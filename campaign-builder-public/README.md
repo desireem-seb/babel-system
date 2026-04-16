@@ -1,6 +1,12 @@
 # Campaign Builder
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 An open-source marketing campaign framework builder for creating structured campaign strategies, managing asset repositories, and visualizing buyer journeys.
+
+[Features](#-features) • [Screenshots](#-screenshots) • [Quick Start](#-quick-start) • [Customization](CUSTOMIZATION.md) • [Contributing](CONTRIBUTING.md) • [FAQ](docs/FAQ.md)
 
 ## 🎯 What It Does
 
@@ -249,13 +255,18 @@ These files are created automatically on first run.
 
 ## 🤝 Contributing
 
-Contributions are welcome! To contribute:
+We welcome contributions from everyone! Whether you're fixing a bug, adding a feature, or improving documentation, your help makes Campaign Builder better.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+**Ways to contribute:**
+- 🐛 Report bugs
+- 💡 Suggest new features  
+- 📝 Improve documentation
+- 🔧 Submit pull requests
+- ⭐ Star the repo to show your support
+
+**Read our [Contributing Guide](CONTRIBUTING.md) to get started!**
+
+This project follows a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold this code.
 
 ## 📝 License
 
