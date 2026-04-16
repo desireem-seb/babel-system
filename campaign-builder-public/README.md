@@ -23,6 +23,48 @@ Campaign Builder helps marketing teams:
 - **Data Persistence**: All data saved locally in JSON files
 - **Responsive Design**: Works on desktop, tablet, and mobile
 
+## 📸 Screenshots
+
+### Home Screen
+Choose from pre-loaded demo products or add your own.
+
+![Home Screen](docs/images/01-home-screen.png)
+
+### Campaign Framework
+View your portfolio message, tagline, and 4 strategic pillars.
+
+![Framework View](docs/images/02-framework-view.png)
+
+### Framework Editor
+Edit your messaging, tagline, and all 4 pillars with an intuitive modal interface.
+
+![Framework Editor](docs/images/03-framework-editor.png)
+
+### Asset Repository
+Organize marketing assets by funnel stage with status tracking and filtering.
+
+![Asset Repository](docs/images/04-asset-repository.png)
+
+### Asset Details
+Edit any asset with detailed fields for type, channels, personas, regions, and more.
+
+![Asset Detail](docs/images/05-asset-detail.png)
+
+### Campaign Flow
+Visualize how assets flow through your buyer journey from awareness to decision.
+
+![Campaign Flow](docs/images/06-campaign-flow.png)
+
+### Flow Editor
+Customize each stage of your buyer journey with editable labels and descriptions.
+
+![Flow Editor](docs/images/07-flow-editor.png)
+
+### Feedback System
+Built-in feedback collection to gather input from your team.
+
+![Feedback Form](docs/images/08-feedback-form.png)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
