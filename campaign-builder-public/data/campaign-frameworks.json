@@ -1,0 +1,53 @@
+{
+  "example-product": {
+    "name": "Example Product",
+    "portfolioMessage": "The Complete Solution for Modern Businesses",
+    "tagline": "Drive growth with intelligent automation and seamless integration",
+    "pillars": [
+      {
+        "id": "pillar-1",
+        "name": "Easy Integration",
+        "description": "Connect all your systems in minutes, not months",
+        "capabilities": [
+          "Pre-built connectors for popular platforms",
+          "API-first architecture",
+          "Real-time data sync",
+          "No-code configuration"
+        ]
+      },
+      {
+        "id": "pillar-2",
+        "name": "Intelligent Automation",
+        "description": "Let AI handle repetitive tasks while you focus on strategy",
+        "capabilities": [
+          "Smart workflow automation",
+          "AI-powered recommendations",
+          "Predictive analytics",
+          "Natural language processing"
+        ]
+      },
+      {
+        "id": "pillar-3",
+        "name": "Enterprise Security",
+        "description": "Bank-level security that keeps your data protected",
+        "capabilities": [
+          "End-to-end encryption",
+          "Role-based access control",
+          "Compliance certifications (SOC 2, GDPR, HIPAA)",
+          "Audit logging and monitoring"
+        ]
+      },
+      {
+        "id": "pillar-4",
+        "name": "Scalable Performance",
+        "description": "Grow without limits with cloud-native infrastructure",
+        "capabilities": [
+          "Auto-scaling architecture",
+          "99.9% uptime SLA",
+          "Global CDN",
+          "Load balancing and failover"
+        ]
+      }
+    ]
+  }
+}

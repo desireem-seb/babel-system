@@ -1,0 +1,31 @@
+{
+  "name": "campaign-builder",
+  "version": "1.0.0",
+  "description": "Open-source marketing campaign framework builder for creating structured campaign strategies, managing asset repositories, and visualizing buyer journeys",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "marketing",
+    "campaign",
+    "framework",
+    "buyer-journey",
+    "marketing-tools",
+    "campaign-management"
+  ],
+  "author": "Desiree Motamedi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/desireem-seb/babel-system.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "fs-extra": "^11.2.0"
+  }
+}

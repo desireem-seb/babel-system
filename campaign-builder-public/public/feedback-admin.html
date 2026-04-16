@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Admin | Salesforce Campaign Builder</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .admin-header {
+      background: linear-gradient(135deg, var(--primary), var(--sf-cloud-blue));
+      color: white;
+      padding: 2rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .feedback-filters {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .feedback-table {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--primary);
+      color: white;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+
+    tbody tr:hover {
+      background: var(--sf-blue-light);
+    }
+
+    .priority-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .priority-critical {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .priority-high {
+      background: #FED7AA;
+      color: #EA580C;
+    }
+
+    .priority-medium {
+      background: #FEF3C7;
+      color: #CA8A04;
+    }
+
+    .priority-low {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .type-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--sf-blue-light);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .filter-group select {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+    }
+
+    .feedback-description {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    .feedback-row.expanded .feedback-description {
+      white-space: normal;
+      max-width: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <h1>💬 Feedback Dashboard</h1>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Campaign Builder User Feedback</p>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button onclick="window.location.href='/'" class="btn btn-secondary">← Back to App</button>
+        <button onclick="exportFeedback()" class="btn btn-primary">📥 Export CSV</button>
+        <button onclick="refreshFeedback()" class="btn btn-secondary">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <div class="admin-stats" id="stats">
+      <!-- Stats will be populated here -->
+    </div>
+
+    <div class="feedback-filters">
+      <div class="filter-group">
+        <label>Type:</label>
+        <select id="typeFilter" onchange="filterFeedback()">
+          <option value="">All</option>
+          <option value="bug">Bug Report</option>
+          <option value="feature">Feature Request</option>
+          <option value="improvement">Improvement</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Priority:</label>
+        <select id="priorityFilter" onchange="filterFeedback()">
+          <option value="">All</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Sort:</label>
+        <select id="sortBy" onchange="filterFeedback()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="priority">Priority</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="feedback-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="feedbackTableBody">
+          <!-- Feedback entries will be populated here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let allFeedback = [];
+
+    async function loadFeedback() {
+      try {
+        const response = await fetch('/api/feedback');
+        allFeedback = await response.json();
+        updateStats();
+        filterFeedback();
+      } catch (error) {
+        console.error('Error loading feedback:', error);
+        alert('Failed to load feedback');
+      }
+    }
+
+    function updateStats() {
+      const stats = {
+        total: allFeedback.length,
+        bugs: allFeedback.filter(f => f.type === 'bug').length,
+        features: allFeedback.filter(f => f.type === 'feature').length,
+        critical: allFeedback.filter(f => f.priority === 'critical').length
+      };
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-number">${stats.total}</div>
+          <div class="stat-label">Total Feedback</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${stats.bugs}</div>
+          <div class="stat-label">Bug Reports</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${stats.features}</div>
+          <div class="stat-label">Feature Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${stats.critical}</div>
+          <div class="stat-label">Critical Priority</div>
+        </div>
+      `;
+    }
+
+    function filterFeedback() {
+      const typeFilter = document.getElementById('typeFilter').value;
+      const priorityFilter = document.getElementById('priorityFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+
+      let filtered = [...allFeedback];
+
+      // Apply filters
+      if (typeFilter) {
+        filtered = filtered.filter(f => f.type === typeFilter);
+      }
+      if (priorityFilter) {
+        filtered = filtered.filter(f => f.priority === priorityFilter);
+      }
+
+      // Apply sorting
+      if (sortBy === 'newest') {
+        filtered.sort((a, b) => new Date(b.submittedAt || b.timestamp) - new Date(a.submittedAt || a.timestamp));
+      } else if (sortBy === 'oldest') {
+        filtered.sort((a, b) => new Date(a.submittedAt || a.timestamp) - new Date(b.submittedAt || b.timestamp));
+      } else if (sortBy === 'priority') {
+        const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        filtered.sort((a, b) => (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0));
+      }
+
+      renderFeedbackTable(filtered);
+    }
+
+    function renderFeedbackTable(feedback) {
+      const tbody = document.getElementById('feedbackTableBody');
+
+      if (feedback.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <h3>No Feedback Yet</h3>
+                <p>Feedback entries will appear here once submitted.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = feedback.map(entry => {
+        const date = new Date(entry.submittedAt || entry.timestamp);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <tr class="feedback-row" data-id="${entry.id}">
+            <td style="white-space: nowrap;">${dateStr}</td>
+            <td><span class="type-badge">${getTypeIcon(entry.type)} ${entry.type}</span></td>
+            <td><span class="priority-badge priority-${entry.priority}">${entry.priority}</span></td>
+            <td style="font-weight: 600;">${entry.title}</td>
+            <td>
+              <div class="feedback-description">${entry.description}</div>
+              <button class="expand-btn" onclick="toggleExpand('${entry.id}')">Show more</button>
+            </td>
+            <td>${entry.email || '—'}</td>
+            <td>
+              <button onclick="copyToClipboard('${entry.id}')" class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.75rem;">📋 Copy</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function getTypeIcon(type) {
+      const icons = {
+        bug: '🐛',
+        feature: '✨',
+        improvement: '🔧',
+        other: '💭'
+      };
+      return icons[type] || '📝';
+    }
+
+    function toggleExpand(id) {
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      row.classList.toggle('expanded');
+      const btn = row.querySelector('.expand-btn');
+      btn.textContent = row.classList.contains('expanded') ? 'Show less' : 'Show more';
+    }
+
+    function copyToClipboard(id) {
+      const entry = allFeedback.find(f => f.id === id);
+      if (entry) {
+        const text = `Type: ${entry.type}\nPriority: ${entry.priority}\nTitle: ${entry.title}\nDescription: ${entry.description}\nEmail: ${entry.email || 'N/A'}\nDate: ${entry.submittedAt || entry.timestamp}`;
+        navigator.clipboard.writeText(text);
+        alert('✅ Feedback copied to clipboard!');
+      }
+    }
+
+    function exportFeedback() {
+      window.location.href = '/api/feedback/export';
+    }
+
+    function refreshFeedback() {
+      loadFeedback();
+    }
+
+    // Load feedback on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFeedback();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Builder | Marketing Framework Tool</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div id="homeButton" class="header-brand">
+          <h1>📊 Campaign Builder</h1>
+        </div>
+        <div class="header-actions">
+          <select id="productSelector" class="product-selector">
+            <option value="">Select Product...</option>
+            <option value="example-product">Example Product</option>
+          </select>
+          <button id="feedbackBtn" class="btn btn-secondary">💬 Feedback</button>
+          <button id="saveCampaign" class="btn btn-primary">💾 Save Campaign</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- No Product Selected State -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-content">
+          <h2>Welcome to Campaign Builder</h2>
+          <p>Select a product to start building your campaign framework</p>
+          <div class="product-grid">
+            <div class="product-card featured" data-product="example-product">
+              <h3>📦 Example Product</h3>
+              <p>Sample campaign framework to get you started</p>
+              <span class="badge">Demo</span>
+            </div>
+          </div>
+          <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4a90e2;">
+            <h3 style="margin-top: 0;">🚀 Getting Started</h3>
+            <p style="margin-bottom: 1rem;">This is an example product to demonstrate the Campaign Builder. To add your own products:</p>
+            <ol style="margin-left: 1.5rem;">
+              <li>Edit <code>data/campaign-frameworks.json</code> to add your products</li>
+              <li>Define your messaging framework, tagline, and pillars</li>
+              <li>Start building your campaign assets and journey maps</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign Content -->
+      <div id="campaignContent" class="campaign-content" style="display: none;">
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+          <button class="tab active" data-tab="framework">📋 Framework</button>
+          <button class="tab" data-tab="repository">📦 Asset Repository</button>
+          <button class="tab" data-tab="flow">🔄 Campaign Flow</button>
+          <button class="tab" data-tab="generator">✨ Content Generator</button>
+          <button class="tab" data-tab="journey">🗺️ Journey Map</button>
+          <button class="tab" data-tab="calendar">📅 Calendar View</button>
+        </nav>
+
+        <!-- Framework Tab -->
+        <div id="frameworkTab" class="tab-content active">
+          <div class="framework-section">
+            <div class="portfolio-box">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 class="portfolio-label">Portfolio</h2>
+                <button id="editFrameworkBtn" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">✏️ Edit Framework</button>
+              </div>
+              <p id="portfolioText" class="portfolio-text"></p>
+              <p id="taglineText" class="tagline-text"></p>
+            </div>
+
+            <div class="pillars-grid" id="pillarsGrid"></div>
+          </div>
+        </div>
+
+        <!-- Asset Repository Tab -->
+        <div id="repositoryTab" class="tab-content">
+          <div class="repository-section">
+            <div class="repository-header">
+              <h2>Asset Repository</h2>
+              <button id="addAssetBtn" class="btn btn-primary">+ Add Asset</button>
+            </div>
+
+            <div class="funnel-stages">
+              <div class="funnel-stage" data-stage="awareness">
+                <div class="stage-header">
+                  <h3>01 Awareness</h3>
+                  <span class="stage-subtitle">Top of Funnel</span>
+                  <div class="stage-count" id="awarenessCount">0 assets | 0 live</div>
+                </div>
+                <div class="assets-list" id="awarenessAssets"></div>
+              </div>
+
+              <div class="funnel-stage" data-stage="familiarity">
+                <div class="stage-header">
+                  <h3>02 Familiarity</h3>
+                  <span class="stage-subtitle">Top of Funnel</span>
+                  <div class="stage-count" id="familiarityCount">0 assets | 0 live</div>
+                </div>
+                <div class="assets-list" id="familiarityAssets"></div>
+              </div>
+
+              <div class="funnel-stage" data-stage="consideration">
+                <div class="stage-header">
+                  <h3>03 Consideration</h3>
+                  <span class="stage-subtitle">Middle</span>
+                  <div class="stage-count" id="considerationCount">0 assets | 0 live</div>
+                </div>
+                <div class="assets-list" id="considerationAssets"></div>
+              </div>
+
+              <div class="funnel-stage" data-stage="decision">
+                <div class="stage-header">
+                  <h3>04 Decision</h3>
+                  <span class="stage-subtitle">Bottom</span>
+                  <div class="stage-count" id="decisionCount">0 assets | 0 live</div>
+                </div>
+                <div class="assets-list" id="decisionAssets"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campaign Flow Tab -->
+        <div id="flowTab" class="tab-content">
+          <div class="flow-section">
+            <div class="flow-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div>
+                <h2>Campaign Flow & Buyer Journey</h2>
+                <p class="subtitle">Complete touchpoint map showing how prospects move through the funnel</p>
+              </div>
+              <button id="editFlowBtn" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">✏️ Edit Campaign Flow</button>
+            </div>
+
+            <div class="flow-filters">
+              <div class="filter-group">
+                <label>Filter by Persona:</label>
+                <select id="flowPersonaFilter">
+                  <option value="">All Personas</option>
+                  <option value="cio">CIO</option>
+                  <option value="cdo">CDO</option>
+                  <option value="ciso">CISO</option>
+                  <option value="technical">Technical Audiences</option>
+                  <option value="sf-developer">Salesforce Developer</option>
+                  <option value="sf-admin">Salesforce Admin</option>
+                  <option value="outside-sf">Outside SF Ecosystem</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Filter by Region:</label>
+                <select id="flowRegionFilter">
+                  <option value="">All Regions</option>
+                  <option value="north-america">North America</option>
+                  <option value="south-america">South America</option>
+                  <option value="emea">EMEA</option>
+                  <option value="apac">APAC</option>
+                  <option value="japan">Japan</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Filter by Language:</label>
+                <select id="flowLanguageFilter">
+                  <option value="">All Languages</option>
+                  <option value="english">English</option>
+                  <option value="spanish">Spanish</option>
+                  <option value="french">French</option>
+                  <option value="german">German</option>
+                  <option value="japanese">Japanese</option>
+                  <option value="portuguese">Portuguese</option>
+                </select>
+              </div>
+              <button id="flowResetFilters" class="btn btn-secondary">Reset Filters</button>
+            </div>
+
+            <div class="flow-visualization" id="flowVisualization">
+              <!-- Flow diagram will be populated here -->
+            </div>
+
+            <div class="content-preview-panel" id="contentPreviewPanel" style="display: none;">
+              <div class="content-preview-header">
+                <h3 id="previewAssetName"></h3>
+                <button class="btn-close" id="closePreviewBtn">&times;</button>
+              </div>
+              <div class="content-preview-body" id="contentPreviewBody">
+                <!-- Asset content will be displayed here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Generator Tab -->
+        <div id="generatorTab" class="tab-content">
+          <div class="generator-section">
+            <div class="generator-header">
+              <h2>Content Generator & Preview</h2>
+              <p class="subtitle">Generate new content or view existing campaign assets</p>
+            </div>
+
+            <!-- Content Generation Form -->
+            <div class="content-generator-form">
+              <h3>✨ Generate New Content</h3>
+              <form id="generateContentForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="genContentType">Content Type:</label>
+                    <select id="genContentType" required>
+                      <option value="">Select type...</option>
+                      <option value="EMAIL">Email</option>
+                      <option value="BLOG POST">Blog Post</option>
+                      <option value="WHITEPAPER">Whitepaper</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="genStage">Campaign Stage:</label>
+                    <select id="genStage" required>
+                      <option value="AWARENESS">Awareness</option>
+                      <option value="CONSIDERATION">Consideration</option>
+                      <option value="DECISION">Decision</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="genAudience">Target Audience:</label>
+                    <select id="genAudience" required>
+                      <option value="Enterprise Leaders">Enterprise Leaders</option>
+                      <option value="Technical Architects">Technical Architects</option>
+                      <option value="Data Leaders">Data Leaders</option>
+                      <option value="CIOs">CIOs</option>
+                      <option value="CDOs">CDOs</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="genPrompt">Custom Title/Prompt (Optional):</label>
+                  <input type="text" id="genPrompt" placeholder="e.g., Why Data 360 is Essential for AI Success">
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <span id="generateBtnText">🚀 Generate Content</span>
+                  <span id="generateBtnSpinner" style="display: none;">⏳ Generating...</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Existing Content Preview List -->
+            <div class="content-preview-header">
+              <h3>📄 Existing Campaign Content</h3>
+            </div>
+            <div class="content-preview-list" id="contentPreviewList">
+              <!-- Content previews will be populated here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Journey Map Tab -->
+        <div id="journeyTab" class="tab-content">
+          <div class="journey-section">
+            <div class="journey-header">
+              <h2>Journey Map</h2>
+              <div style="display: flex; gap: 1rem;">
+                <button id="clearJourneyBtn" class="btn btn-secondary">🗑️ Clear All</button>
+                <button id="connectModeBtn" class="btn btn-secondary">🔗 Connect Mode</button>
+              </div>
+            </div>
+
+            <div class="journey-controls">
+              <div class="journey-control-group">
+                <label>Add Asset to Canvas:</label>
+                <select id="assetToAdd">
+                  <option value="">Select an asset...</option>
+                </select>
+                <button id="addToCanvasBtn" class="btn btn-primary">+ Add to Canvas</button>
+              </div>
+            </div>
+
+            <div class="journey-filters">
+              <h3>Filter Journey View</h3>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label>Persona:</label>
+                  <select id="journeyPersonaFilter">
+                    <option value="">All Personas</option>
+                    <option value="cio">CIO</option>
+                    <option value="cdo">CDO</option>
+                    <option value="ciso">CISO</option>
+                    <option value="technical">Technical Audiences</option>
+                    <option value="sf-developer">Salesforce Developer</option>
+                    <option value="sf-admin">Salesforce Admin</option>
+                    <option value="outside-sf">Outside SF Ecosystem</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Region:</label>
+                  <select id="journeyRegionFilter">
+                    <option value="">All Regions</option>
+                    <option value="north-america">North America</option>
+                    <option value="south-america">South America</option>
+                    <option value="emea">EMEA</option>
+                    <option value="apac">APAC</option>
+                    <option value="japan">Japan</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Language:</label>
+                  <select id="journeyLanguageFilter">
+                    <option value="">All Languages</option>
+                    <option value="english">English</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                    <option value="german">German</option>
+                    <option value="japanese">Japanese</option>
+                    <option value="portuguese">Portuguese</option>
+                  </select>
+                </div>
+                <button id="journeyApplyFilters" class="btn btn-primary">Apply Filters</button>
+                <button id="journeyResetFilters" class="btn btn-secondary">Reset</button>
+              </div>
+            </div>
+
+            <div id="journeyCanvas" class="journey-canvas">
+              <svg class="connections" id="connectionsSvg">
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="#0176D3" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar View Tab -->
+        <div id="calendarTab" class="tab-content">
+          <div class="calendar-section">
+            <div class="calendar-header">
+              <h2>Campaign Calendar</h2>
+              <div class="calendar-actions">
+                <button id="exportToSlidesBtn" class="btn btn-primary">📊 Export to Google Slides</button>
+                <button id="downloadCalendarBtn" class="btn btn-secondary">⬇️ Download</button>
+              </div>
+            </div>
+
+            <div class="calendar-filters">
+              <div class="filter-group">
+                <label>View:</label>
+                <select id="calendarView">
+                  <option value="month">Month</option>
+                  <option value="quarter">Quarter</option>
+                  <option value="year">Year</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Product:</label>
+                <select id="calendarProductFilter">
+                  <option value="">All Products</option>
+                  <option value="data360">Data 360</option>
+                  <option value="agentforce">Agentforce</option>
+                  <option value="tableau">Tableau</option>
+                  <option value="mulesoft">MuleSoft</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Audience:</label>
+                <select id="calendarAudienceFilter">
+                  <option value="">All Audiences</option>
+                  <option value="cio">CIO</option>
+                  <option value="cdo">CDO</option>
+                  <option value="technical">Technical</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Stage:</label>
+                <select id="calendarStageFilter">
+                  <option value="">All Stages</option>
+                  <option value="awareness">Awareness</option>
+                  <option value="consideration">Consideration</option>
+                  <option value="decision">Decision</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="calendarView" class="calendar-container">
+              <!-- Calendar will be dynamically rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Asset Modal -->
+  <div id="assetModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Asset</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="assetForm">
+          <div class="form-group">
+            <label>Asset Type *</label>
+            <select id="assetType" required>
+              <option value="">Select Type...</option>
+              <option value="WEBPAGE">Webpage</option>
+              <option value="BLOG POST">Blog Post</option>
+              <option value="WHITEPAPER">Whitepaper</option>
+              <option value="EBOOK">eBook</option>
+              <option value="REPORT">Report</option>
+              <option value="GUIDE">Guide</option>
+              <option value="WEBINAR">Webinar</option>
+              <option value="DEMO">Demo</option>
+              <option value="VIDEO">Video</option>
+              <option value="NEWSLETTER">Newsletter</option>
+              <option value="SEO ARTICLE">SEO Article</option>
+              <option value="SOLUTION BRIEF">Solution Brief</option>
+              <option value="THIRD-PARTY RESEARCH">Third-Party Research</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Asset Name *</label>
+            <input type="text" id="assetName" required placeholder="e.g., Data 360 Product Overview">
+          </div>
+
+          <div class="form-group">
+            <label>Funnel Stage *</label>
+            <select id="assetStage" required>
+              <option value="awareness">Awareness</option>
+              <option value="familiarity">Familiarity</option>
+              <option value="consideration">Consideration</option>
+              <option value="decision">Decision</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Status *</label>
+            <select id="assetStatus" required>
+              <option value="live">✅ Live</option>
+              <option value="in-progress">🔴 In Progress</option>
+              <option value="being-refreshed">🟠 Being Refreshed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Channels</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="channel" value="gated"> Gated</label>
+              <label><input type="checkbox" name="channel" value="sem"> SEM</label>
+              <label><input type="checkbox" name="channel" value="cs"> CS</label>
+              <label><input type="checkbox" name="channel" value="global"> Global</label>
+              <label><input type="checkbox" name="channel" value="email"> Email</label>
+              <label><input type="checkbox" name="channel" value="english-only"> English Only</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Pillar (Optional)</label>
+            <select id="assetPillar">
+              <option value="">No specific pillar</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Products (Multi-Select)</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="product" value="data360"> Data 360</label>
+              <label><input type="checkbox" name="product" value="agentforce"> Agentforce</label>
+              <label><input type="checkbox" name="product" value="tableau"> Tableau</label>
+              <label><input type="checkbox" name="product" value="mulesoft"> MuleSoft</label>
+              <label><input type="checkbox" name="product" value="informatica"> Informatica</label>
+              <label><input type="checkbox" name="product" value="trusted-services"> Trusted Services</label>
+              <label><input type="checkbox" name="product" value="developer-services"> Developer Services</label>
+            </div>
+            <small style="color: var(--sf-gray-medium); display: block; margin-top: 0.5rem;">Select all products this asset applies to (useful for solution assets)</small>
+          </div>
+
+          <div class="form-group">
+            <label>Target Personas</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="persona" value="cio"> CIO</label>
+              <label><input type="checkbox" name="persona" value="cdo"> CDO</label>
+              <label><input type="checkbox" name="persona" value="ciso"> CISO</label>
+              <label><input type="checkbox" name="persona" value="technical"> Technical Audiences</label>
+              <label><input type="checkbox" name="persona" value="sf-developer"> Salesforce Developer</label>
+              <label><input type="checkbox" name="persona" value="sf-admin"> Salesforce Admin</label>
+              <label><input type="checkbox" name="persona" value="outside-sf"> Outside SF Ecosystem</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Regions</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="region" value="north-america"> North America</label>
+              <label><input type="checkbox" name="region" value="south-america"> South America</label>
+              <label><input type="checkbox" name="region" value="emea"> EMEA</label>
+              <label><input type="checkbox" name="region" value="apac"> APAC</label>
+              <label><input type="checkbox" name="region" value="japan"> Japan</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Languages</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="language" value="english"> English</label>
+              <label><input type="checkbox" name="language" value="spanish"> Spanish</label>
+              <label><input type="checkbox" name="language" value="french"> French</label>
+              <label><input type="checkbox" name="language" value="german"> German</label>
+              <label><input type="checkbox" name="language" value="japanese"> Japanese</label>
+              <label><input type="checkbox" name="language" value="portuguese"> Portuguese</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description (Optional)</label>
+            <textarea id="assetDescription" rows="3" placeholder="Brief description of the asset..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Asset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>💬 Send Feedback</h2>
+        <button class="modal-close feedback-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="feedbackForm">
+          <div class="form-group">
+            <label>Feedback Type *</label>
+            <select id="feedbackType" required>
+              <option value="">Select type...</option>
+              <option value="bug">🐛 Bug Report</option>
+              <option value="feature">✨ Feature Request</option>
+              <option value="improvement">🔧 Improvement</option>
+              <option value="other">💭 Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="feedbackPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="feedbackTitle" required placeholder="Brief summary of your feedback">
+          </div>
+
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea id="feedbackDescription" rows="5" required placeholder="Describe your feedback in detail..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Your Email (Optional)</label>
+            <input type="email" id="feedbackEmail" placeholder="your.email@salesforce.com">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary feedback-close">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <span id="feedbackBtnText">Send Feedback</span>
+              <span id="feedbackBtnSpinner" style="display: none;">Sending...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Framework Modal -->
+  <div id="editFrameworkModal" class="modal">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>✏️ Edit Campaign Framework</h2>
+        <button class="modal-close framework-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editFrameworkForm">
+
+          <!-- Header Section -->
+          <div style="background: var(--sf-blue-light); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--primary);">
+            <h3 style="margin: 0 0 1rem 0; color: var(--primary);">📋 Header (Displayed at Top)</h3>
+
+            <div class="form-group">
+              <label>Portfolio Message *</label>
+              <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">
+                Main headline that appears at the top of the framework page
+              </small>
+              <textarea id="editPortfolioMessage" rows="2" required placeholder="e.g., The Intelligent Context Engine for AI"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Tagline *</label>
+              <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">
+                Supporting tagline below the portfolio message
+              </small>
+              <input type="text" id="editTagline" required placeholder="e.g., Ground every AI agent in real-time, trusted context">
+            </div>
+          </div>
+
+          <!-- Pillars Section -->
+          <div style="background: #FFF; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--border-strong);">
+            <h3 style="margin: 0 0 1rem 0; color: var(--primary);">📊 Four Pillars (The Main Content Columns)</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+              These are the 4 main columns that appear below the header. Each pillar represents a key capability or value proposition.
+            </p>
+
+            <!-- Pillar 1 -->
+            <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; background: var(--bg-secondary);">
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">Column 1</h4>
+              <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="editPillar1Name" required placeholder="e.g., Unify Every Data Source">
+              </div>
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea id="editPillar1Description" rows="2" required placeholder="Brief description of this pillar"></textarea>
+              </div>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; background: var(--bg-secondary);">
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">Column 2</h4>
+              <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="editPillar2Name" required placeholder="e.g., Intelligent Context">
+              </div>
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea id="editPillar2Description" rows="2" required placeholder="Brief description of this pillar"></textarea>
+              </div>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; background: var(--bg-secondary);">
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">Column 3</h4>
+              <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="editPillar3Name" required placeholder="e.g., Real-Time Activation">
+              </div>
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea id="editPillar3Description" rows="2" required placeholder="Brief description of this pillar"></textarea>
+              </div>
+            </div>
+
+            <!-- Pillar 4 -->
+            <div style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; background: var(--bg-secondary);">
+              <h4 style="margin: 0 0 0.75rem 0; color: var(--text-primary);">Column 4</h4>
+              <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="editPillar4Name" required placeholder="e.g., Trusted Enterprise">
+              </div>
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea id="editPillar4Description" rows="2" required placeholder="Brief description of this pillar"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary framework-close">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <span id="frameworkBtnText">💾 Save Framework</span>
+              <span id="frameworkBtnSpinner" style="display: none;">Saving...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Campaign Flow Modal -->
+  <div id="editFlowModal" class="modal">
+    <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>✏️ Edit Campaign Flow Stages</h2>
+        <button class="modal-close flow-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--sf-blue-light); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+          <p style="margin: 0; color: var(--text-primary); font-size: 0.875rem;">
+            <strong>📍 About Campaign Flow:</strong> These stages represent the buyer journey touchpoints. Edit the labels and descriptions to match your campaign strategy. The order shown here is the default flow sequence.
+          </p>
+        </div>
+
+        <form id="editFlowForm">
+          <div id="flowStagesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+            <!-- Flow stages will be dynamically populated here -->
+          </div>
+
+          <div class="form-actions" style="margin-top: 2rem;">
+            <button type="button" class="btn btn-secondary flow-close">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <span id="flowBtnText">💾 Save Campaign Flow</span>
+              <span id="flowBtnSpinner" style="display: none;">Saving...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="journey-map.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
