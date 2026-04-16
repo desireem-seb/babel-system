@@ -17,7 +17,9 @@
         <div class="header-actions">
           <select id="productSelector" class="product-selector">
             <option value="">Select Product...</option>
-            <option value="example-product">Example Product</option>
+            <option value="cloudflow-platform">CloudFlow Platform</option>
+            <option value="dataiq-analytics">DataIQ Analytics</option>
+            <option value="securepass-identity">SecurePass Identity</option>
           </select>
           <button id="feedbackBtn" class="btn btn-secondary">💬 Feedback</button>
           <button id="saveCampaign" class="btn btn-primary">💾 Save Campaign</button>
@@ -33,19 +35,30 @@
           <h2>Welcome to Campaign Builder</h2>
           <p>Select a product to start building your campaign framework</p>
           <div class="product-grid">
-            <div class="product-card featured" data-product="example-product">
-              <h3>📦 Example Product</h3>
-              <p>Sample campaign framework to get you started</p>
+            <div class="product-card featured" data-product="cloudflow-platform">
+              <h3>🔗 CloudFlow Platform</h3>
+              <p>Complete cloud integration platform</p>
+              <span class="badge">Full Campaign Example</span>
+            </div>
+            <div class="product-card" data-product="dataiq-analytics">
+              <h3>📊 DataIQ Analytics</h3>
+              <p>AI-powered analytics for everyone</p>
+              <span class="badge">Demo</span>
+            </div>
+            <div class="product-card" data-product="securepass-identity">
+              <h3>🔐 SecurePass Identity</h3>
+              <p>Passwordless authentication platform</p>
               <span class="badge">Demo</span>
             </div>
           </div>
           <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4a90e2;">
             <h3 style="margin-top: 0;">🚀 Getting Started</h3>
-            <p style="margin-bottom: 1rem;">This is an example product to demonstrate the Campaign Builder. To add your own products:</p>
+            <p style="margin-bottom: 1rem;">These are example products to demonstrate Campaign Builder's capabilities. To customize for your products:</p>
             <ol style="margin-left: 1.5rem;">
               <li>Edit <code>data/campaign-frameworks.json</code> to add your products</li>
-              <li>Define your messaging framework, tagline, and pillars</li>
-              <li>Start building your campaign assets and journey maps</li>
+              <li>Define your messaging framework, tagline, and 4 pillars</li>
+              <li>Add campaign assets and build your buyer journey</li>
+              <li>See <code>CUSTOMIZATION.md</code> for detailed instructions</li>
             </ol>
           </div>
         </div>

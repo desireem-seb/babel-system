@@ -1,51 +1,181 @@
 {
-  "example-product": {
-    "name": "Example Product",
-    "portfolioMessage": "The Complete Solution for Modern Businesses",
-    "tagline": "Drive growth with intelligent automation and seamless integration",
+  "cloudflow-platform": {
+    "name": "CloudFlow Platform",
+    "portfolioMessage": "The Complete Cloud Integration Platform for Modern Enterprises",
+    "tagline": "Connect every app, automate every workflow, scale without limits",
     "pillars": [
       {
         "id": "pillar-1",
-        "name": "Easy Integration",
-        "description": "Connect all your systems in minutes, not months",
+        "name": "Universal Connectivity",
+        "description": "Connect any system in minutes with pre-built integrations",
         "capabilities": [
-          "Pre-built connectors for popular platforms",
+          "500+ pre-built connectors",
           "API-first architecture",
           "Real-time data sync",
-          "No-code configuration"
+          "Custom connector builder",
+          "Legacy system support"
         ]
       },
       {
         "id": "pillar-2",
         "name": "Intelligent Automation",
-        "description": "Let AI handle repetitive tasks while you focus on strategy",
+        "description": "AI-powered workflows that learn and optimize themselves",
         "capabilities": [
-          "Smart workflow automation",
-          "AI-powered recommendations",
-          "Predictive analytics",
-          "Natural language processing"
+          "Visual workflow designer",
+          "ML-powered optimization",
+          "Smart error handling",
+          "Predictive scaling",
+          "Natural language automation"
         ]
       },
       {
         "id": "pillar-3",
         "name": "Enterprise Security",
-        "description": "Bank-level security that keeps your data protected",
+        "description": "Bank-grade security with compliance built in",
         "capabilities": [
           "End-to-end encryption",
+          "SOC 2 Type II certified",
+          "GDPR & HIPAA compliant",
           "Role-based access control",
-          "Compliance certifications (SOC 2, GDPR, HIPAA)",
-          "Audit logging and monitoring"
+          "Complete audit trails"
         ]
       },
       {
         "id": "pillar-4",
-        "name": "Scalable Performance",
-        "description": "Grow without limits with cloud-native infrastructure",
+        "name": "Infinite Scale",
+        "description": "Cloud-native infrastructure that grows with you",
         "capabilities": [
           "Auto-scaling architecture",
-          "99.9% uptime SLA",
-          "Global CDN",
-          "Load balancing and failover"
+          "99.99% uptime SLA",
+          "Global multi-region deployment",
+          "Zero-downtime updates",
+          "Built-in disaster recovery"
+        ]
+      }
+    ],
+    "flowStages": {
+      "awareness": { "label": "AWARENESS", "subtitle": "First touch" },
+      "hero_asset": { "label": "HERO CONTENT", "subtitle": "Flagship offer" },
+      "conversion": { "label": "CONVERSION", "subtitle": "Capture lead" },
+      "conversion_confirmation": { "label": "THANK YOU", "subtitle": "Confirmation" },
+      "nurture_day1": { "label": "DAY 1", "subtitle": "Welcome series" },
+      "nurture_day3": { "label": "DAY 3", "subtitle": "Value demonstration" },
+      "nurture_day7": { "label": "DAY 7", "subtitle": "Use case deep-dive" },
+      "nurture_day14": { "label": "DAY 14", "subtitle": "Social proof" },
+      "nurture_day21": { "label": "DAY 21", "subtitle": "Event invitation" },
+      "engagement_registration": { "label": "WEBINAR REG", "subtitle": "Sign up" },
+      "engagement_event": { "label": "LIVE EVENT", "subtitle": "Webinar/demo" },
+      "engagement_followup": { "label": "FOLLOW-UP", "subtitle": "Recording & resources" },
+      "decision_demo_offer": { "label": "DEMO REQUEST", "subtitle": "Sales handoff" },
+      "decision_proof": { "label": "PROOF POINTS", "subtitle": "ROI & case studies" }
+    }
+  },
+  "dataiq-analytics": {
+    "name": "DataIQ Analytics",
+    "portfolioMessage": "Turn Your Data Into Intelligent Decisions",
+    "tagline": "Real-time analytics powered by AI, designed for everyone",
+    "pillars": [
+      {
+        "id": "pillar-1",
+        "name": "Self-Service Analytics",
+        "description": "Empower every team member to explore data independently",
+        "capabilities": [
+          "Drag-and-drop interface",
+          "Natural language queries",
+          "Pre-built dashboard templates",
+          "No SQL required",
+          "Collaborative workspaces"
+        ]
+      },
+      {
+        "id": "pillar-2",
+        "name": "AI-Powered Insights",
+        "description": "Automatic anomaly detection and predictive analytics",
+        "capabilities": [
+          "Smart recommendations",
+          "Trend forecasting",
+          "Automated alerts",
+          "Pattern recognition",
+          "Explainable AI"
+        ]
+      },
+      {
+        "id": "pillar-3",
+        "name": "Enterprise Data Governance",
+        "description": "Control, secure, and certify your data assets",
+        "capabilities": [
+          "Data lineage tracking",
+          "Certified data sources",
+          "Row-level security",
+          "Privacy controls",
+          "Compliance reporting"
+        ]
+      },
+      {
+        "id": "pillar-4",
+        "name": "Universal Connectivity",
+        "description": "Connect to any data source, anywhere",
+        "capabilities": [
+          "Cloud & on-premise connectors",
+          "Real-time streaming data",
+          "Data warehouse integration",
+          "API access",
+          "Mobile & web access"
+        ]
+      }
+    ]
+  },
+  "securepass-identity": {
+    "name": "SecurePass Identity",
+    "portfolioMessage": "Zero Trust Security Starts With Identity",
+    "tagline": "Passwordless authentication that users love and IT trusts",
+    "pillars": [
+      {
+        "id": "pillar-1",
+        "name": "Passwordless Authentication",
+        "description": "Eliminate passwords with biometric and token-based auth",
+        "capabilities": [
+          "Biometric login (Face ID, fingerprint)",
+          "Hardware security keys",
+          "Magic link authentication",
+          "Push notifications",
+          "Single sign-on (SSO)"
+        ]
+      },
+      {
+        "id": "pillar-2",
+        "name": "Adaptive Risk Engine",
+        "description": "AI that detects threats and adapts in real-time",
+        "capabilities": [
+          "Behavioral analysis",
+          "Device trust scoring",
+          "Location-based policies",
+          "Impossible travel detection",
+          "Threat intelligence integration"
+        ]
+      },
+      {
+        "id": "pillar-3",
+        "name": "Zero Trust Architecture",
+        "description": "Never trust, always verify every access request",
+        "capabilities": [
+          "Continuous authentication",
+          "Least privilege access",
+          "Micro-segmentation",
+          "Just-in-time permissions",
+          "Session recording"
+        ]
+      },
+      {
+        "id": "pillar-4",
+        "name": "Seamless User Experience",
+        "description": "Security that feels invisible to users",
+        "capabilities": [
+          "One-click access",
+          "Mobile-first design",
+          "Self-service password reset",
+          "Customizable branding",
+          "Multi-language support"
         ]
       }
     ]
