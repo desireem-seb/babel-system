@@ -1,55 +1,36 @@
-# Personal Projects
+# babel-system
 
-Personal coding projects, experiments, and tools by Desiree Motamedi.
+Open-source tools for marketers, built by [Desiree Motamedi](https://github.com/desireem-seb).
+
+---
 
 ## Projects
 
-### Campaign Builder
-Open-source marketing campaign framework builder.
+### 📊 Campaign Builder
+An open-source marketing campaign framework builder for B2B and SaaS marketing teams.
 
-**Status:** ✅ Complete & Published
+**Status:** ✅ Live & Published
 
-**Features:**
-- Campaign framework editor (messaging, tagline, 4 pillars)
-- Asset repository by funnel stage
-- Customizable campaign flow stages
-- Visual buyer journey mapping
-- Team feedback system
-- Easy branding and customization
+**What it does:**
+- Define campaign frameworks — portfolio messaging, tagline, and 4 strategic pillars
+- Manage a full asset repository by funnel stage with search, tagging, and CSV export
+- Configure target personas and marketing channels per product — no JSON editing required
+- Customize buyer journey touchpoints in the campaign flow editor
+- Generate AI-powered campaign copy (emails, blog posts, landing pages, and more) via Claude
+- Plan campaigns by quarter with a week-by-week visual grid
+- Map buyer journeys on a drag-and-drop canvas
 
-**Tech:** Node.js, Express, vanilla JavaScript  
+**Tech:** Node.js · Express · Vanilla JavaScript · Anthropic API  
 **License:** MIT  
-**Docs:** See `campaign-builder-public/README.md`
+**Docs:** [`campaign-builder-public/README.md`](campaign-builder-public/README.md)
 
 ---
-
-### Social Media Agent
-AI-powered social media content creation and management tool.
-
-**Status:** 🚧 In Development
-
-**Features:**
-- Content generation for social platforms
-- Multi-platform posting
-- Analytics and insights
-- Content scheduling
-
----
-
-## Getting Started
-
-Each project directory contains its own README with setup instructions and documentation.
 
 ## Structure
 ```
-personal-projects/
-├── campaign-builder-public/   # Open-source marketing campaign framework tool
-├── social-media-agent/         # Social media automation and content generation
-└── [future projects]/          # Additional projects as they're created
+babel-system/
+└── campaign-builder-public/   # Open-source marketing campaign framework tool
 ```
 
-## Tech Stack
-- Node.js / Python
-- AI/LLM integration
-- Web APIs
-- Frontend frameworks (as needed)
+## About
+Built for marketers who want structure without the overhead of enterprise tools. Everything runs locally, data stays in JSON files, and the whole thing can be deployed to Heroku in minutes.
