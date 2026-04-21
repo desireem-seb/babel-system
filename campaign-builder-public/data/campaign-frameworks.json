@@ -3,7 +3,31 @@
     "name": "CloudFlow Platform",
     "portfolioMessage": "The Complete Cloud Integration Platform for Modern Enterprises",
     "tagline": "Connect every app, automate every workflow, scale without limits",
-    "campaignBrief": {},
+    "personas": [
+      { "value": "cio", "label": "CIO" },
+      { "value": "it-director", "label": "IT Director" },
+      { "value": "enterprise-architect", "label": "Enterprise Architect" },
+      { "value": "ciso", "label": "CISO" },
+      { "value": "technical", "label": "Technical Audiences" },
+      { "value": "business-decision-maker", "label": "Business Decision Maker" }
+    ],
+    "channels": [
+      { "value": "paid-search", "label": "Paid Search" },
+      { "value": "paid-social", "label": "Paid Social / LinkedIn" },
+      { "value": "email", "label": "Email Nurture" },
+      { "value": "events-webinar", "label": "Events / Webinar" },
+      { "value": "content-seo", "label": "Content / SEO" },
+      { "value": "website", "label": "Website" },
+      { "value": "direct-sales", "label": "Direct Sales" },
+      { "value": "field-marketing", "label": "Field Marketing" }
+    ],
+    "campaignBrief": {
+      "content": "CLOUDFLOW PLATFORM — Q2/Q3 2026 CAMPAIGN BRIEF\n\nCampaign Name: Connect Everything. Automate Everything.\nCampaign Period: April – September 2026\nQuarter Theme: AI-First Integration — The Year Automation Becomes Standard\n\n---\n\nOBJECTIVE\nDrive awareness of CloudFlow as the AI-native integration platform for enterprise IT, generate 1,200 qualified leads across North America and EMEA, and support a $4.2M pipeline target for H1 FY26.\n\n---\n\nTARGET AUDIENCE\nPrimary: IT Directors and Enterprise Architects at companies with 500+ employees and 100+ business applications\nSecondary: CIOs and CTOs evaluating middleware consolidation or digital transformation initiatives\nBuyer Personas: The Overloaded IT Director (backlog, cost pressure), The Visionary CIO (AI strategy, transformation mandate), The Platform Architect (technical evaluator)\n\n---\n\nKEY MESSAGES\n1. Enterprise integration is broken — 67% of IT budgets are consumed by integration maintenance. CloudFlow fixes this.\n2. AI isn't a feature. It's the platform. CloudFlow's AI builds, monitors, and heals integrations automatically.\n3. Enterprise-grade security and compliance are built in, not bolted on — SOC 2, GDPR, HIPAA, ISO 27001.\n4. From first connection to full enterprise deployment: 500+ connectors, 99.99% uptime, and white-glove support.\n\n---\n\nCREATIVE DIRECTION\nTone: Authoritative but human. We talk to practitioners, not procurement. Direct, specific, evidence-driven.\nVisual: Clean, blue-dominant. Abstract network/connection motifs. Real customer logos where approved.\nProof Points: Lead with data. Third-party validation (Gartner MQ, G2) and real customer metrics in every asset.\n\n---\n\nTARGET OUTCOMES\n- 1,200 net new MQLs across all channels\n- 15,000 whitepaper downloads\n- 2,000 webinar registrations (May 14 event)\n- 420 demo requests\n- 34% MQL-to-SQL conversion rate\n- $4.2M in sourced pipeline\n\n---\n\nCHANNEL MIX\nPaid Search (30%) | Paid Social LinkedIn (25%) | Email Nurture (20%) | Events/Webinar (15%) | Content/SEO (10%)\n\n---\n\nKEY MILESTONES\nApril 7 — Whitepaper + Assessment launch\nApril 14 — Blog post + ROI calculator live\nMay 1 — Newsletter launch\nMay 14 — Live webinar (target: 2,000 registrations)\nJune 18 — CloudFlow Summit, San Francisco\nJuly 1 — Q3 refresh: new personas, ABM push"
+    },
+    "quarterlyThemes": {
+      "Q2-2026": "AI-First Integration — The Year Automation Becomes Standard",
+      "Q3-2026": "Scale Without Limits — Enterprise Readiness at Any Stage"
+    },
     "pillars": [
       {
         "id": "pillar-1",

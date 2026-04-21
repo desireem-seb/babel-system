@@ -142,42 +142,49 @@ class JourneyMap {
   toggleConnectMode() {
     this.connectMode = !this.connectMode;
     const btn = document.getElementById('connectModeBtn');
+    const hint = document.getElementById('connectModeHint');
 
     if (this.connectMode) {
       btn.textContent = '✓ Connect Mode ON';
       btn.classList.add('btn-primary');
       btn.classList.remove('btn-secondary');
       this.canvas.style.cursor = 'crosshair';
+      if (hint) hint.style.display = 'inline';
     } else {
       btn.textContent = '🔗 Connect Mode';
       btn.classList.remove('btn-primary');
       btn.classList.add('btn-secondary');
       this.canvas.style.cursor = 'default';
+      if (hint) hint.style.display = 'none';
       this.selectedNode = null;
     }
   }
 
+  stageColor(stage) {
+    return { awareness: '#3B82F6', familiarity: '#06B6D4', consideration: '#10B981', decision: '#8B5CF6' }[stage] || '#4a90e2';
+  }
+
   handleNodeClick(nodeId) {
     if (!this.selectedNode) {
-      // First node selected
       this.selectedNode = nodeId;
       const nodeEl = document.querySelector(`[data-node-id="${nodeId}"]`);
-      nodeEl.style.border = '3px solid #FFB75D';
+      nodeEl.style.border = '3px solid #F59E0B';
+      nodeEl.style.boxShadow = '0 0 0 3px rgba(245,158,11,0.25)';
     } else if (this.selectedNode === nodeId) {
-      // Clicked same node, deselect
+      // Clicked same node — deselect
       const nodeEl = document.querySelector(`[data-node-id="${nodeId}"]`);
       const node = this.nodes.find(n => n.id === nodeId);
-      nodeEl.style.border = `2px solid var(--sf-${node.asset.stage === 'awareness' ? 'blue' : node.asset.stage === 'familiarity' ? 'cloud-blue' : node.asset.stage === 'consideration' ? 'teal' : 'orange'})`;
+      nodeEl.style.border = `2px solid ${this.stageColor(node.asset.stage)}`;
+      nodeEl.style.boxShadow = '';
       this.selectedNode = null;
     } else {
-      // Second node selected, create connection
+      // Second node — draw connection
       this.createConnection(this.selectedNode, nodeId);
 
-      // Reset selection
       const firstNodeEl = document.querySelector(`[data-node-id="${this.selectedNode}"]`);
       const firstNode = this.nodes.find(n => n.id === this.selectedNode);
-      firstNodeEl.style.border = `2px solid var(--sf-${firstNode.asset.stage === 'awareness' ? 'blue' : firstNode.asset.stage === 'familiarity' ? 'cloud-blue' : firstNode.asset.stage === 'consideration' ? 'teal' : 'orange'})`;
-
+      firstNodeEl.style.border = `2px solid ${this.stageColor(firstNode.asset.stage)}`;
+      firstNodeEl.style.boxShadow = '';
       this.selectedNode = null;
     }
   }
@@ -189,7 +196,7 @@ class JourneyMap {
     );
 
     if (exists) {
-      alert('Connection already exists');
+      if (typeof showToast === 'function') showToast('Connection already exists', 2500);
       return;
     }
 

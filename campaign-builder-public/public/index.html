@@ -21,8 +21,15 @@
             <option value="dataiq-analytics">DataIQ Analytics</option>
             <option value="securepass-identity">SecurePass Identity</option>
           </select>
+          <div class="quarter-nav-group" id="quarterNavGroup" style="display:none;">
+            <label class="quarter-nav-label">Quarter:</label>
+            <select id="quarterDropdown" class="quarter-dropdown">
+              <option value="">All Quarters</option>
+            </select>
+            <button id="addQuarterBtn" class="btn-add-quarter" title="Add a new quarter">+ Quarter</button>
+          </div>
           <button id="feedbackBtn" class="btn btn-secondary">💬 Feedback</button>
-          <button id="saveCampaign" class="btn btn-primary">💾 Save Campaign</button>
+          <button id="saveCampaign" class="btn btn-primary" style="display:none;">💾 Save Work</button>
         </div>
       </div>
     </header>
@@ -31,36 +38,75 @@
     <main class="main-content">
       <!-- No Product Selected State -->
       <div id="emptyState" class="empty-state">
-        <div class="empty-state-content">
-          <h2>Welcome to Campaign Builder</h2>
-          <p>Select a product to start building your campaign framework</p>
-          <div class="product-grid">
-            <div class="product-card featured" data-product="cloudflow-platform">
-              <h3>🔗 CloudFlow Platform</h3>
-              <p>Complete cloud integration platform</p>
-              <span class="badge">Full Campaign Example</span>
-            </div>
-            <div class="product-card" data-product="dataiq-analytics">
-              <h3>📊 DataIQ Analytics</h3>
-              <p>AI-powered analytics for everyone</p>
-              <span class="badge">Demo</span>
-            </div>
-            <div class="product-card" data-product="securepass-identity">
-              <h3>🔐 SecurePass Identity</h3>
-              <p>Passwordless authentication platform</p>
-              <span class="badge">Demo</span>
+        <div class="home-wrapper">
+
+          <!-- Hero -->
+          <div class="home-hero">
+            <span class="home-eyebrow">Open Source · Free to Use</span>
+            <h2 class="home-title">Build Smarter Campaigns</h2>
+            <p class="home-subtitle">Structure your messaging, organize assets, map buyer journeys, and generate AI-powered content — all in one place.</p>
+          </div>
+
+          <!-- Product picker -->
+          <div class="home-products">
+            <p class="home-section-label">Choose a product to explore</p>
+            <div class="product-grid">
+              <div class="product-card featured" data-product="cloudflow-platform">
+                <h3>🔗 CloudFlow Platform</h3>
+                <p>Complete cloud integration platform</p>
+                <span class="badge">Full Campaign Example</span>
+              </div>
+              <div class="product-card" data-product="dataiq-analytics">
+                <h3>📊 DataIQ Analytics</h3>
+                <p>AI-powered analytics for everyone</p>
+                <span class="badge">Demo</span>
+              </div>
+              <div class="product-card" data-product="securepass-identity">
+                <h3>🔐 SecurePass Identity</h3>
+                <p>Passwordless authentication platform</p>
+                <span class="badge">Demo</span>
+              </div>
             </div>
           </div>
-          <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4a90e2;">
-            <h3 style="margin-top: 0;">🚀 Getting Started</h3>
-            <p style="margin-bottom: 1rem;">These are example products to demonstrate Campaign Builder's capabilities. To customize for your products:</p>
-            <ol style="margin-left: 1.5rem;">
-              <li>Edit <code>data/campaign-frameworks.json</code> to add your products</li>
-              <li>Define your messaging framework, tagline, and 4 pillars</li>
-              <li>Add campaign assets and build your buyer journey</li>
-              <li>See <code>CUSTOMIZATION.md</code> for detailed instructions</li>
-            </ol>
+
+          <!-- Setup cards -->
+          <div class="home-setup">
+            <div class="setup-card setup-blue">
+              <div class="setup-card-icon">🚀</div>
+              <h3>Getting Started</h3>
+              <p>These are demo products. To use your own:</p>
+              <ol>
+                <li>Edit <code>data/campaign-frameworks.json</code></li>
+                <li>Add your product name, tagline, and 4 pillars</li>
+                <li>Start adding assets and building your journey</li>
+                <li>See <code>CUSTOMIZATION.md</code> for full details</li>
+              </ol>
+            </div>
+            <div class="setup-card setup-amber">
+              <div class="setup-card-icon">🎯</div>
+              <h3>Personas &amp; Channels</h3>
+              <p>Both are managed <strong>inside the app</strong> — no JSON editing needed.</p>
+              <ol>
+                <li>Select a product above</li>
+                <li>Go to the <strong>Framework</strong> tab</li>
+                <li>Click <strong>✏️ Edit Framework</strong></li>
+                <li>Edit <strong>Target Personas</strong> and <strong>Channels</strong> to match your go-to-market</li>
+              </ol>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #92400e;">These appear as tagging options on every asset and in the Content Generator.</p>
+            </div>
+            <div class="setup-card setup-green">
+              <div class="setup-card-icon">✨</div>
+              <h3>AI Content Generation</h3>
+              <p>Generate copy using the Anthropic API — free to start, 2-minute setup.</p>
+              <ol>
+                <li>Get a key at <strong>console.anthropic.com</strong></li>
+                <li>Copy <code>.env.example</code> → <code>.env</code></li>
+                <li>Set <code>ANTHROPIC_API_KEY=sk-ant-...</code></li>
+                <li>Restart: <code>npm start</code></li>
+              </ol>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -88,15 +134,19 @@
               <p id="taglineText" class="tagline-text"></p>
             </div>
 
-            <!-- Campaign Brief Section -->
+            <div class="pillars-grid" id="pillarsGrid"></div>
+
+            <!-- Campaign Brief Section — below pillars -->
             <div id="campaignBriefSection" class="campaign-brief-box" style="display: none;">
               <div class="brief-header">
-                <h3 class="brief-title">📄 Campaign Brief</h3>
+                <div>
+                  <h3 class="brief-title">📄 Campaign Brief</h3>
+                  <p id="quarterThemeDisplay" class="quarter-theme-pill" style="display:none;"></p>
+                </div>
+                <button id="editBriefBtn" class="btn btn-secondary">✏️ Edit Campaign Brief</button>
               </div>
               <div id="campaignBriefDisplay" class="brief-display"></div>
             </div>
-
-            <div class="pillars-grid" id="pillarsGrid"></div>
           </div>
         </div>
 
@@ -105,7 +155,17 @@
           <div class="repository-section">
             <div class="repository-header">
               <h2>Asset Repository</h2>
-              <button id="addAssetBtn" class="btn btn-primary">+ Add Asset</button>
+              <div class="repository-actions">
+                <div class="search-wrapper">
+                  <input type="text" id="assetSearchInput" class="asset-search" placeholder="🔍 Search assets…" autocomplete="off">
+                </div>
+                <button id="exportCsvBtn" class="btn btn-secondary">⬇️ Export CSV</button>
+                <button id="addAssetBtn" class="btn btn-primary">+ Add Asset</button>
+              </div>
+            </div>
+
+            <div id="searchNoResults" class="search-no-results" style="display:none;">
+              No assets match "<span id="searchTerm"></span>"
             </div>
 
             <div class="funnel-stages">
@@ -165,12 +225,16 @@
                 <select id="flowPersonaFilter">
                   <option value="">All Personas</option>
                   <option value="cio">CIO</option>
+                  <option value="cmo">CMO</option>
                   <option value="cdo">CDO</option>
                   <option value="ciso">CISO</option>
+                  <option value="vp-marketing">VP Marketing</option>
+                  <option value="marketing-manager">Marketing Manager</option>
+                  <option value="demand-gen">Demand Gen Manager</option>
+                  <option value="it-director">IT Director</option>
                   <option value="technical">Technical Audiences</option>
-                  <option value="sf-developer">Salesforce Developer</option>
-                  <option value="sf-admin">Salesforce Admin</option>
-                  <option value="outside-sf">Outside SF Ecosystem</option>
+                  <option value="product-marketer">Product Marketer</option>
+                  <option value="business-decision-maker">Business Decision Maker</option>
                 </select>
               </div>
               <div class="filter-group">
@@ -223,9 +287,6 @@
               <p class="subtitle">Generate new content or view existing campaign assets</p>
             </div>
 
-            <!-- Campaign Context Panel (populated from brief) -->
-            <div id="generatorBriefContext" class="generator-context-panel" style="display: none;"></div>
-
             <!-- Content Generation Form -->
             <div class="content-generator-form">
               <h3>✨ Generate New Content</h3>
@@ -238,6 +299,14 @@
                       <option value="EMAIL">Email</option>
                       <option value="BLOG POST">Blog Post</option>
                       <option value="WHITEPAPER">Whitepaper</option>
+                      <option value="LANDING PAGE">Landing Page</option>
+                      <option value="SOLUTION BRIEF">Solution Brief</option>
+                      <option value="CASE STUDY">Case Study</option>
+                      <option value="WEBINAR">Webinar Script</option>
+                      <option value="SOCIAL POST">Social Media Post</option>
+                      <option value="VIDEO SCRIPT">Video Script</option>
+                      <option value="NEWSLETTER">Newsletter</option>
+                      <option value="DATASHEET">Datasheet</option>
                     </select>
                   </div>
 
@@ -245,6 +314,7 @@
                     <label for="genStage">Campaign Stage:</label>
                     <select id="genStage" required>
                       <option value="AWARENESS">Awareness</option>
+                      <option value="FAMILIARITY">Familiarity</option>
                       <option value="CONSIDERATION">Consideration</option>
                       <option value="DECISION">Decision</option>
                     </select>
@@ -254,10 +324,15 @@
                     <label for="genAudience">Target Audience:</label>
                     <select id="genAudience" required>
                       <option value="Enterprise Leaders">Enterprise Leaders</option>
-                      <option value="Technical Architects">Technical Architects</option>
-                      <option value="Data Leaders">Data Leaders</option>
                       <option value="CIOs">CIOs</option>
-                      <option value="CDOs">CDOs</option>
+                      <option value="CMOs">CMOs</option>
+                      <option value="VP Marketing">VP Marketing</option>
+                      <option value="Marketing Managers">Marketing Managers</option>
+                      <option value="Demand Gen Managers">Demand Gen Managers</option>
+                      <option value="Technical Architects">Technical Architects</option>
+                      <option value="IT Directors">IT Directors</option>
+                      <option value="Product Marketers">Product Marketers</option>
+                      <option value="Business Decision Makers">Business Decision Makers</option>
                     </select>
                   </div>
                 </div>
@@ -289,9 +364,12 @@
           <div class="journey-section">
             <div class="journey-header">
               <h2>Journey Map</h2>
-              <div style="display: flex; gap: 1rem;">
-                <button id="clearJourneyBtn" class="btn btn-secondary">🗑️ Clear All</button>
-                <button id="connectModeBtn" class="btn btn-secondary">🔗 Connect Mode</button>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                <div style="display: flex; gap: 1rem;">
+                  <button id="clearJourneyBtn" class="btn btn-secondary">🗑️ Clear All</button>
+                  <button id="connectModeBtn" class="btn btn-secondary">🔗 Connect Mode</button>
+                </div>
+                <span id="connectModeHint" style="font-size: 0.75rem; color: var(--text-muted); display: none;">Click a node, then click another to draw an arrow between them</span>
               </div>
             </div>
 
@@ -313,12 +391,16 @@
                   <select id="journeyPersonaFilter">
                     <option value="">All Personas</option>
                     <option value="cio">CIO</option>
+                    <option value="cmo">CMO</option>
                     <option value="cdo">CDO</option>
                     <option value="ciso">CISO</option>
+                    <option value="vp-marketing">VP Marketing</option>
+                    <option value="marketing-manager">Marketing Manager</option>
+                    <option value="demand-gen">Demand Gen Manager</option>
+                    <option value="it-director">IT Director</option>
                     <option value="technical">Technical Audiences</option>
-                    <option value="sf-developer">Salesforce Developer</option>
-                    <option value="sf-admin">Salesforce Admin</option>
-                    <option value="outside-sf">Outside SF Ecosystem</option>
+                    <option value="product-marketer">Product Marketer</option>
+                    <option value="business-decision-maker">Business Decision Maker</option>
                   </select>
                 </div>
                 <div class="filter-group">
@@ -382,21 +464,14 @@
                 </select>
               </div>
               <div class="filter-group">
-                <label>Product:</label>
-                <select id="calendarProductFilter">
-                  <option value="">All Products</option>
-                  <option value="data360">Data 360</option>
-                  <option value="agentforce">Agentforce</option>
-                  <option value="tableau">Tableau</option>
-                  <option value="mulesoft">MuleSoft</option>
-                </select>
-              </div>
-              <div class="filter-group">
                 <label>Audience:</label>
                 <select id="calendarAudienceFilter">
                   <option value="">All Audiences</option>
                   <option value="cio">CIO</option>
+                  <option value="cmo">CMO</option>
                   <option value="cdo">CDO</option>
+                  <option value="vp-marketing">VP Marketing</option>
+                  <option value="it-director">IT Director</option>
                   <option value="technical">Technical</option>
                 </select>
               </div>
@@ -405,11 +480,14 @@
                 <select id="calendarStageFilter">
                   <option value="">All Stages</option>
                   <option value="awareness">Awareness</option>
+                  <option value="familiarity">Familiarity</option>
                   <option value="consideration">Consideration</option>
                   <option value="decision">Decision</option>
                 </select>
               </div>
             </div>
+            <!-- hidden shim so JS calendarProductFilter lookup doesn't fail -->
+            <select id="calendarProductFilter" style="display:none;"><option value=""></option></select>
 
             <div id="calendarContainer" class="calendar-container">
               <!-- Calendar will be dynamically rendered here -->
@@ -451,7 +529,12 @@
 
           <div class="form-group">
             <label>Asset Name *</label>
-            <input type="text" id="assetName" required placeholder="e.g., Data 360 Product Overview">
+            <input type="text" id="assetName" required placeholder="e.g., Q3 Campaign Overview Whitepaper">
+          </div>
+
+          <div class="form-group">
+            <label>Asset URL <span style="color:var(--text-muted); font-weight:400;">(optional — live page, Google Doc, Drive folder)</span></label>
+            <input type="url" id="assetUrl" placeholder="https://…">
           </div>
 
           <div class="form-group">
@@ -474,14 +557,9 @@
           </div>
 
           <div class="form-group">
-            <label>Channels</label>
-            <div class="checkbox-group">
-              <label><input type="checkbox" name="channel" value="gated"> Gated</label>
-              <label><input type="checkbox" name="channel" value="sem"> SEM</label>
-              <label><input type="checkbox" name="channel" value="cs"> CS</label>
-              <label><input type="checkbox" name="channel" value="global"> Global</label>
-              <label><input type="checkbox" name="channel" value="email"> Email</label>
-              <label><input type="checkbox" name="channel" value="english-only"> English Only</label>
+            <label>Channels <small style="color:var(--text-muted); font-weight:400;">(manage in Framework → Edit Channels)</small></label>
+            <div class="checkbox-group" id="channelCheckboxGroup">
+              <!-- Populated dynamically from framework channels -->
             </div>
           </div>
 
@@ -493,29 +571,9 @@
           </div>
 
           <div class="form-group">
-            <label>Products (Multi-Select)</label>
-            <div class="checkbox-group">
-              <label><input type="checkbox" name="product" value="data360"> Data 360</label>
-              <label><input type="checkbox" name="product" value="agentforce"> Agentforce</label>
-              <label><input type="checkbox" name="product" value="tableau"> Tableau</label>
-              <label><input type="checkbox" name="product" value="mulesoft"> MuleSoft</label>
-              <label><input type="checkbox" name="product" value="informatica"> Informatica</label>
-              <label><input type="checkbox" name="product" value="trusted-services"> Trusted Services</label>
-              <label><input type="checkbox" name="product" value="developer-services"> Developer Services</label>
-            </div>
-            <small style="color: var(--sf-gray-medium); display: block; margin-top: 0.5rem;">Select all products this asset applies to (useful for solution assets)</small>
-          </div>
-
-          <div class="form-group">
-            <label>Target Personas</label>
-            <div class="checkbox-group">
-              <label><input type="checkbox" name="persona" value="cio"> CIO</label>
-              <label><input type="checkbox" name="persona" value="cdo"> CDO</label>
-              <label><input type="checkbox" name="persona" value="ciso"> CISO</label>
-              <label><input type="checkbox" name="persona" value="technical"> Technical Audiences</label>
-              <label><input type="checkbox" name="persona" value="sf-developer"> Salesforce Developer</label>
-              <label><input type="checkbox" name="persona" value="sf-admin"> Salesforce Admin</label>
-              <label><input type="checkbox" name="persona" value="outside-sf"> Outside SF Ecosystem</label>
+            <label>Target Personas <small style="color:var(--text-muted); font-weight:400;">(manage in Framework → Edit Personas)</small></label>
+            <div class="checkbox-group" id="personaCheckboxGroup">
+              <!-- Populated dynamically from framework personas -->
             </div>
           </div>
 
@@ -540,6 +598,14 @@
               <label><input type="checkbox" name="language" value="japanese"> Japanese</label>
               <label><input type="checkbox" name="language" value="portuguese"> Portuguese</label>
             </div>
+          </div>
+
+          <div class="form-group">
+            <label>Quarters</label>
+            <div class="checkbox-group" id="assetQuartersGroup">
+              <!-- Populated dynamically -->
+            </div>
+            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Select all quarters this asset is active in. Campaigns can span multiple quarters.</small>
           </div>
 
           <div class="form-group">
@@ -598,7 +664,7 @@
 
           <div class="form-group">
             <label>Your Email (Optional)</label>
-            <input type="email" id="feedbackEmail" placeholder="your.email@salesforce.com">
+            <input type="email" id="feedbackEmail" placeholder="your@email.com">
           </div>
 
           <div class="form-actions">
@@ -622,39 +688,6 @@
       </div>
       <div class="modal-body">
         <form id="editFrameworkForm">
-
-          <!-- Campaign Brief Section -->
-          <div style="background: #f0f7ff; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--accent);">
-            <h3 style="margin: 0 0 0.5rem 0; color: var(--accent);">📄 Campaign Brief</h3>
-            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;">High-level strategy that informs all assets and content across this campaign.</p>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Campaign Name</label>
-                <input type="text" id="editCampaignName" placeholder="e.g., Q2 2026 Cloud Integration Campaign">
-              </div>
-              <div class="form-group">
-                <label>Campaign Period</label>
-                <input type="text" id="editCampaignPeriod" placeholder="e.g., Apr – Jun 2026">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Campaign Objective</label>
-              <textarea id="editCampaignObjective" rows="2" placeholder="What are the primary goals of this campaign?"></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Key Messages</label>
-              <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Core messages that all assets should reinforce (one per line)</small>
-              <textarea id="editKeyMessages" rows="4" placeholder="e.g., We eliminate integration complexity&#10;Real-time sync across every system&#10;Enterprise-grade security built in"></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Target Outcomes / KPIs</label>
-              <input type="text" id="editTargetOutcomes" placeholder="e.g., 500 MQLs, 2× pipeline growth, 30% awareness lift">
-            </div>
-          </div>
 
           <!-- Header Section -->
           <div style="background: var(--sf-blue-light); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--primary);">
@@ -737,6 +770,30 @@
             </div>
           </div>
 
+          <!-- Personas Section -->
+          <div style="background: #FFF; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 2px solid var(--border-strong);">
+            <h3 style="margin: 0 0 0.5rem 0; color: var(--primary);">👤 Target Personas</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+              Define the personas for your campaigns. These appear as options when tagging assets.
+            </p>
+            <div id="personasEditorList" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+              <!-- Populated dynamically -->
+            </div>
+            <button type="button" id="addPersonaBtn" class="btn btn-secondary" style="font-size:0.82rem;">+ Add Persona</button>
+          </div>
+
+          <!-- Channels Section -->
+          <div style="background: #FFF; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--border-strong);">
+            <h3 style="margin: 0 0 0.5rem 0; color: var(--primary);">📡 Channels</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+              Define the marketing channels for this product. These appear as options when tagging assets.
+            </p>
+            <div id="channelsEditorList" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+              <!-- Populated dynamically -->
+            </div>
+            <button type="button" id="addChannelBtn" class="btn btn-secondary" style="font-size:0.82rem;">+ Add Channel</button>
+          </div>
+
           <div class="form-actions">
             <button type="button" class="btn btn-secondary framework-close">Cancel</button>
             <button type="submit" class="btn btn-primary">
@@ -757,18 +814,22 @@
         <button class="modal-close flow-close">&times;</button>
       </div>
       <div class="modal-body">
-        <div style="background: var(--sf-blue-light); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+        <div style="background: var(--primary-light); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
           <p style="margin: 0; color: var(--text-primary); font-size: 0.875rem;">
-            <strong>📍 About Campaign Flow:</strong> These stages represent the buyer journey touchpoints. Edit the labels and descriptions to match your campaign strategy. The order shown here is the default flow sequence.
+            <strong>📍 About Campaign Flow:</strong> These stages represent the buyer journey touchpoints. Add, remove, or relabel any stage to match your campaign strategy.
           </p>
         </div>
 
         <form id="editFlowForm">
-          <div id="flowStagesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+          <div id="flowStagesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
             <!-- Flow stages will be dynamically populated here -->
           </div>
 
-          <div class="form-actions" style="margin-top: 2rem;">
+          <div style="margin-top: 1.5rem;">
+            <button type="button" id="addFlowStageBtn" class="btn btn-secondary">+ Add Touchpoint</button>
+          </div>
+
+          <div class="form-actions" style="margin-top: 1.5rem;">
             <button type="button" class="btn btn-secondary flow-close">Cancel</button>
             <button type="submit" class="btn btn-primary">
               <span id="flowBtnText">💾 Save Campaign Flow</span>
@@ -778,6 +839,114 @@
         </form>
       </div>
     </div>
+  </div>
+
+  <!-- Campaign Brief Modal -->
+  <div id="campaignBriefModal" class="modal">
+    <div class="modal-content" style="max-width: 780px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>📄 Edit Campaign Brief</h2>
+        <button class="modal-close brief-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="brief-modal-toolbar">
+          <button id="useTemplateBtn" class="btn btn-secondary">📋 Use Template</button>
+          <label class="btn btn-secondary" style="cursor:pointer; margin:0;">
+            📎 Upload File
+            <input type="file" id="briefFileUpload" accept=".txt,.md,.html" style="display:none;">
+          </label>
+          <span class="brief-modal-tip">Tip: paste directly from Google Docs — formatting is preserved</span>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Campaign Brief Content *</label>
+          <textarea id="briefContentInput" rows="22" placeholder="Paste your campaign brief here, or click 'Use Template' to start from a structured outline..."></textarea>
+        </div>
+
+        <div id="quarterThemeSection" class="form-group" style="margin-top: 1rem; display: none;">
+          <label>Quarter Theme <span id="quarterThemeLabel" style="color:var(--primary); font-weight:600;"></span></label>
+          <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">A short strategic focus line for this quarter (e.g., "AI-First Integration Stories")</small>
+          <input type="text" id="quarterThemeInput" placeholder="e.g., AI-First Integration Stories">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary brief-modal-close">Cancel</button>
+          <button type="button" id="saveBriefBtn" class="btn btn-primary">💾 Save Brief</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Asset Suggestions Modal -->
+  <div id="assetSuggestionsModal" class="modal">
+    <div class="modal-content" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>✨ Suggested New Assets</h2>
+        <button class="modal-close suggestions-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+          Your campaign messaging has been updated. Based on your new strategy, here are assets we recommend creating. Select the ones you want and we'll generate real content for each.
+        </p>
+        <div id="assetSuggestionsList" class="suggestions-list"></div>
+        <div id="suggestionsGenerating" style="display:none; text-align:center; padding: 2rem;">
+          <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+          <p id="suggestionsProgress">Generating assets...</p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary suggestions-close">Skip for Now</button>
+          <button type="button" id="generateSuggestedBtn" class="btn btn-primary">✨ Generate Selected Assets</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Quarter Modal -->
+  <div id="addQuarterModal" class="modal">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3>Add Quarter</h3>
+        <button class="modal-close aq-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Select Quarter</label>
+          <select id="newQuarterSelect" style="width:100%;"></select>
+        </div>
+        <div id="duplicateFromPrompt" style="display:none; margin-top:1rem; padding:1rem; background:var(--sf-blue-light); border-radius:var(--radius-md);">
+          <p style="font-size:0.875rem; margin-bottom:0.75rem;">Copy assets from <strong id="duplicateFromLabel"></strong> into this quarter?</p>
+          <div style="display:flex; gap:0.5rem;">
+            <button id="aqAddBlank" class="btn btn-secondary" style="flex:1;">Start Blank</button>
+            <button id="aqDuplicate" class="btn btn-primary" style="flex:1;">📋 Duplicate Assets</button>
+          </div>
+        </div>
+        <div id="noDuplicatePrompt" style="margin-top:1rem;">
+          <button id="aqAddBlankOnly" class="btn btn-primary" style="width:100%;">Add Quarter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duplicate Quarter Review Modal -->
+  <div id="duplicateQuarterModal" class="modal">
+    <div class="modal-content" style="max-width: 660px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h2>📋 Duplicate Quarter</h2>
+        <button class="modal-close duplicate-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="duplicateQuarterContent"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary duplicate-close">Cancel</button>
+          <button type="button" id="confirmDuplicateBtn" class="btn btn-primary">✅ Confirm Duplicate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="saveToast" style="display:none; position:fixed; bottom:1.5rem; right:1.5rem; background:#181818; color:#fff; padding:0.75rem 1.25rem; border-radius:8px; font-size:0.875rem; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+    ✅ Campaign saved
   </div>
 
   <script src="journey-map.js"></script>

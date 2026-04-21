@@ -5,6 +5,8 @@ let currentCampaign = null;
 let editingAsset = null;
 let lastFrameworkUpdate = null;
 let calendarQuarterOffset = 0;
+let currentQuarter = null;
+let currentAssetSearch = '';
 
 // DOM Elements
 const productSelector = document.getElementById('productSelector');
@@ -65,6 +67,25 @@ function setupEventListeners() {
   addAssetBtn.addEventListener('click', () => {
     openAssetModal();
   });
+
+  // Asset search
+  const assetSearchInput = document.getElementById('assetSearchInput');
+  if (assetSearchInput) {
+    let searchTimer;
+    assetSearchInput.addEventListener('input', e => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        currentAssetSearch = e.target.value.trim().toLowerCase();
+        renderAssetRepository();
+      }, 200);
+    });
+  }
+
+  // CSV export
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', exportAssetsCSV);
+  }
 
   // Modal close buttons
   document.querySelectorAll('.modal-close').forEach(btn => {
@@ -249,6 +270,105 @@ function setupEventListeners() {
     });
   }
 
+  // Quarter tabs — delegated from container
+  const quarterDropdown = document.getElementById('quarterDropdown');
+  if (quarterDropdown) {
+    quarterDropdown.addEventListener('change', e => {
+      currentQuarter = e.target.value || null;
+      calendarQuarterOffset = 0;
+      applyQuarterFilter();
+    });
+  }
+
+  // Add quarter button
+  const addQuarterBtn = document.getElementById('addQuarterBtn');
+  if (addQuarterBtn) {
+    addQuarterBtn.addEventListener('click', openAddQuarterModal);
+  }
+
+  // Add quarter modal
+  const addQuarterModal = document.getElementById('addQuarterModal');
+  document.querySelectorAll('.aq-close').forEach(btn => {
+    btn.addEventListener('click', () => { addQuarterModal.style.display = 'none'; });
+  });
+  if (addQuarterModal) {
+    addQuarterModal.addEventListener('click', e => {
+      if (e.target === addQuarterModal) addQuarterModal.style.display = 'none';
+    });
+  }
+  const newQuarterSelect = document.getElementById('newQuarterSelect');
+  if (newQuarterSelect) {
+    newQuarterSelect.addEventListener('change', updateAddQuarterPrompt);
+  }
+  document.getElementById('aqAddBlank')?.addEventListener('click', () => {
+    addQuarterToList(document.getElementById('newQuarterSelect').value, false);
+  });
+  document.getElementById('aqDuplicate')?.addEventListener('click', () => {
+    const target = document.getElementById('newQuarterSelect').value;
+    document.getElementById('addQuarterModal').style.display = 'none';
+    openDuplicateQuarterModal(currentQuarter, target);
+  });
+  document.getElementById('aqAddBlankOnly')?.addEventListener('click', () => {
+    addQuarterToList(document.getElementById('newQuarterSelect').value, false);
+  });
+
+  // Campaign Brief modal
+  const editBriefBtn = document.getElementById('editBriefBtn');
+  const campaignBriefModal = document.getElementById('campaignBriefModal');
+  const briefCloseButtons = document.querySelectorAll('.brief-modal-close');
+  const saveBriefBtn = document.getElementById('saveBriefBtn');
+  const useTemplateBtn = document.getElementById('useTemplateBtn');
+  const briefFileUpload = document.getElementById('briefFileUpload');
+
+  if (editBriefBtn) {
+    editBriefBtn.addEventListener('click', openCampaignBriefModal);
+  }
+  briefCloseButtons.forEach(btn => {
+    btn.addEventListener('click', () => { campaignBriefModal.style.display = 'none'; });
+  });
+  if (campaignBriefModal) {
+    campaignBriefModal.addEventListener('click', e => {
+      if (e.target === campaignBriefModal) campaignBriefModal.style.display = 'none';
+    });
+  }
+  if (saveBriefBtn) {
+    saveBriefBtn.addEventListener('click', saveCampaignBrief);
+  }
+  if (useTemplateBtn) {
+    useTemplateBtn.addEventListener('click', useTemplate);
+  }
+  if (briefFileUpload) {
+    briefFileUpload.addEventListener('change', handleBriefFileUpload);
+  }
+
+  // Asset suggestions modal
+  const suggestionsCloseButtons = document.querySelectorAll('.suggestions-close');
+  const assetSuggestionsModal = document.getElementById('assetSuggestionsModal');
+  suggestionsCloseButtons.forEach(btn => {
+    btn.addEventListener('click', () => { assetSuggestionsModal.style.display = 'none'; });
+  });
+  if (assetSuggestionsModal) {
+    assetSuggestionsModal.addEventListener('click', e => {
+      if (e.target === assetSuggestionsModal) assetSuggestionsModal.style.display = 'none';
+    });
+  }
+  const generateSuggestedBtn = document.getElementById('generateSuggestedBtn');
+  if (generateSuggestedBtn) {
+    generateSuggestedBtn.addEventListener('click', generateSuggestedAssets);
+  }
+
+  // Duplicate quarter review modal
+  const duplicateQuarterModal = document.getElementById('duplicateQuarterModal');
+  document.querySelectorAll('.duplicate-close').forEach(btn => {
+    btn.addEventListener('click', () => { duplicateQuarterModal.style.display = 'none'; });
+  });
+  if (duplicateQuarterModal) {
+    duplicateQuarterModal.addEventListener('click', e => {
+      if (e.target === duplicateQuarterModal) duplicateQuarterModal.style.display = 'none';
+    });
+  }
+  document.getElementById('confirmDuplicateBtn')?.addEventListener('click', confirmDuplicateQuarter);
+
   // Calendar filters
   const calendarView = document.getElementById('calendarView');
   const calendarProductFilter = document.getElementById('calendarProductFilter');
@@ -278,15 +398,13 @@ function setupEventListeners() {
 }
 
 function goHome() {
-  // Reset state
   currentProduct = null;
   currentFramework = null;
   currentCampaign = null;
-
-  // Reset product selector
+  currentQuarter = null;
   productSelector.value = '';
-
-  // Show empty state, hide campaign content
+  document.getElementById('quarterNavGroup').style.display = 'none';
+  document.getElementById('saveCampaign').style.display = 'none';
   campaignContent.style.display = 'none';
   emptyState.style.display = 'block';
 }
@@ -306,13 +424,23 @@ async function loadProduct(productId) {
     // Show campaign content
     emptyState.style.display = 'none';
     campaignContent.style.display = 'block';
+    document.getElementById('saveCampaign').style.display = 'inline-flex';
+
+    // Init active quarters (default to current calendar quarter)
+    if (!currentCampaign.activeQuarters || currentCampaign.activeQuarters.length === 0) {
+      const now = new Date();
+      const q = Math.floor(now.getMonth() / 3) + 1;
+      const y = now.getFullYear();
+      currentCampaign.activeQuarters = [`Q${q}-${y}`];
+    }
+    document.getElementById('quarterNavGroup').style.display = 'flex';
+    renderQuarterTabs();
 
     // Render all tabs
     renderFramework();
     renderAssetRepository();
     renderCampaignFlow();
     renderContentGenerator();
-    renderContentGeneratorBriefContext();
 
     // Load assets into journey map
     if (journeyMap) {
@@ -321,14 +449,14 @@ async function loadProduct(productId) {
     }
   } catch (error) {
     console.error('Error loading product:', error);
-    alert('Failed to load product data');
+    showToast('⚠️ Failed to load product data', 4000);
   }
 }
 
 function renderFramework() {
   // Portfolio
-  portfolioText.textContent = currentFramework.portfolio;
-  taglineText.textContent = currentFramework.tagline;
+  portfolioText.textContent = currentFramework.portfolioMessage || currentFramework.portfolio || '';
+  taglineText.textContent = currentFramework.tagline || '';
 
   // Pillars
   pillarsGrid.innerHTML = '';
@@ -360,6 +488,8 @@ function renderFramework() {
     pillarSelect.appendChild(option);
   });
 
+  rebuildPersonaFilters();
+  rebuildChannelFilters();
   renderCampaignBrief();
 }
 
@@ -368,50 +498,85 @@ function renderCampaignBrief() {
   const briefDisplay = document.getElementById('campaignBriefDisplay');
   if (!briefSection || !briefDisplay) return;
 
-  const brief = currentFramework.campaignBrief || {};
   briefSection.style.display = 'block';
 
-  const hasContent = brief.campaignName || brief.objective || brief.keyMessages || brief.targetOutcomes;
+  // Quarter theme pill
+  const themeDisplay = document.getElementById('quarterThemeDisplay');
+  if (themeDisplay && currentQuarter && currentFramework) {
+    const theme = (currentFramework.quarterlyThemes || {})[currentQuarter];
+    if (theme) {
+      themeDisplay.textContent = `🎯 ${currentQuarter}: ${theme}`;
+      themeDisplay.style.display = 'inline-block';
+    } else {
+      themeDisplay.style.display = 'none';
+    }
+  } else if (themeDisplay) {
+    themeDisplay.style.display = 'none';
+  }
 
-  if (!hasContent) {
+  const content = currentFramework.campaignBrief?.content || '';
+
+  if (!content) {
     briefDisplay.innerHTML = `
       <div class="brief-empty">
-        <p>No campaign brief added yet. Click <strong>✏️ Edit Framework</strong> to define your campaign strategy — it will flow through to all tabs.</p>
+        <p>No campaign brief yet. Click <strong>✏️ Edit Campaign Brief</strong> to add one — paste from Google Docs or use the built-in template.</p>
       </div>
     `;
     return;
   }
 
-  briefDisplay.innerHTML = `
-    <div class="brief-fields">
-      ${brief.campaignName ? `<div class="brief-field"><span class="brief-label">Campaign</span><span class="brief-value">${brief.campaignName}</span></div>` : ''}
-      ${brief.campaignPeriod ? `<div class="brief-field"><span class="brief-label">Period</span><span class="brief-value">${brief.campaignPeriod}</span></div>` : ''}
-      ${brief.targetOutcomes ? `<div class="brief-field"><span class="brief-label">KPIs</span><span class="brief-value">${brief.targetOutcomes}</span></div>` : ''}
-      ${brief.objective ? `<div class="brief-field brief-field-full"><span class="brief-label">Objective</span><div class="brief-value">${brief.objective}</div></div>` : ''}
-      ${brief.keyMessages ? `<div class="brief-field brief-field-full"><span class="brief-label">Key Messages</span><div class="brief-value brief-messages">${brief.keyMessages.replace(/\n/g, '<br>')}</div></div>` : ''}
-    </div>
-  `;
+  briefDisplay.innerHTML = `<div class="brief-content-body">${content.replace(/\n/g, '<br>')}</div>`;
+}
+
+function getQuarterFilteredAssets(assets) {
+  if (!currentQuarter) return assets;
+  return assets.filter(a => {
+    if (!a.quarters || a.quarters.length === 0) {
+      // Fall back to launch date if no quarters assigned
+      if (a.launchDate || a.createdAt) {
+        const d = new Date(a.launchDate || a.createdAt);
+        const q = Math.floor(d.getMonth() / 3) + 1;
+        const y = d.getFullYear();
+        return `Q${q}-${y}` === currentQuarter;
+      }
+      return true; // unassigned with no date shows in all views
+    }
+    return a.quarters.includes(currentQuarter);
+  });
 }
 
 function renderAssetRepository() {
   const stages = ['awareness', 'familiarity', 'consideration', 'decision'];
+  let allAssets = getQuarterFilteredAssets(currentCampaign.assets || []);
+
+  // Apply search filter
+  if (currentAssetSearch) {
+    allAssets = allAssets.filter(a =>
+      a.name.toLowerCase().includes(currentAssetSearch) ||
+      (a.type || '').toLowerCase().includes(currentAssetSearch) ||
+      (a.description || '').toLowerCase().includes(currentAssetSearch)
+    );
+  }
+
+  // Show/hide no-results banner
+  const noResults = document.getElementById('searchNoResults');
+  const searchTermEl = document.getElementById('searchTerm');
+  if (noResults) {
+    const hasAny = allAssets.length > 0;
+    noResults.style.display = (currentAssetSearch && !hasAny) ? 'block' : 'none';
+    if (searchTermEl) searchTermEl.textContent = currentAssetSearch;
+  }
 
   stages.forEach(stage => {
-    const assets = (currentCampaign.assets || []).filter(a => a.stage === stage);
+    const assets = allAssets.filter(a => a.stage === stage);
     const liveCount = assets.filter(a => a.status === 'live').length;
 
-    // Update count
     const countEl = document.getElementById(`${stage}Count`);
     countEl.textContent = `${assets.length} assets | ${liveCount} live`;
 
-    // Render assets
     const listEl = document.getElementById(`${stage}Assets`);
     listEl.innerHTML = '';
-
-    assets.forEach(asset => {
-      const assetCard = createAssetCard(asset);
-      listEl.appendChild(assetCard);
-    });
+    assets.forEach(asset => listEl.appendChild(createAssetCard(asset)));
   });
 }
 
@@ -426,44 +591,73 @@ function createAssetCard(asset) {
     'being-refreshed': '🟠'
   };
 
-  const channelTags = (asset.channels || []).map(ch =>
-    `<span class="channel-tag ${ch}">${ch.toUpperCase()}</span>`
+  // Handle both singular and plural field names for backward compatibility
+  const channels = asset.channels || (asset.channel ? [].concat(asset.channel) : []);
+  const personas = asset.personas || (asset.persona ? [].concat(asset.persona) : []);
+  const regions = asset.regions || (asset.region ? [].concat(asset.region) : []);
+  const languages = asset.languages || (asset.language ? [].concat(asset.language) : []);
+
+  const channelTags = channels.map(ch =>
+    `<span class="channel-tag">${getChannelLabel(ch)}</span>`
   ).join('');
 
-  const productTags = (asset.products || []).map(p =>
-    `<span class="product-tag ${p}">${p.toUpperCase().replace('-', ' ')}</span>`
+  const personaTags = personas.map(p => {
+    const label = getPersonaLabel(p);
+    return `<span class="persona-tag ${p.toLowerCase().replace(/\s+/g, '-')}">${label}</span>`;
+  }).join('');
+
+  const regionTags = regions.map(r =>
+    `<span class="region-tag">${r}</span>`
   ).join('');
 
-  const personaTags = (asset.personas || []).map(p =>
-    `<span class="persona-tag ${p}">${p.toUpperCase().replace('-', ' ')}</span>`
+  const languageTags = languages.map(l =>
+    `<span class="language-tag">${l}</span>`
   ).join('');
 
-  const regionTags = (asset.regions || []).map(r =>
-    `<span class="region-tag ${r}">${r.toUpperCase().replace('-', ' ')}</span>`
-  ).join('');
-
-  const languageTags = (asset.languages || []).map(l =>
-    `<span class="language-tag ${l}">${l.charAt(0).toUpperCase() + l.slice(1)}</span>`
-  ).join('');
+  const statusCycle = { 'live': 'in-progress', 'in-progress': 'being-refreshed', 'being-refreshed': 'live' };
+  const statusLabels = { 'live': 'Live', 'in-progress': 'In Progress', 'being-refreshed': 'Refreshing' };
 
   card.innerHTML = `
     <div class="asset-header">
       <span class="asset-type">${asset.type}</span>
-      <span class="asset-status">${statusIcons[asset.status]}</span>
+      <div class="asset-card-actions">
+        <button class="asset-status-btn status-${asset.status}" data-status="${asset.status}" title="Click to change status">${statusIcons[asset.status] || '⚪'} <span class="status-label">${statusLabels[asset.status] || ''}</span></button>
+        <button class="asset-dupe-btn" title="Duplicate asset">⧉</button>
+        <button class="asset-edit-btn" title="Edit asset">✏️</button>
+      </div>
     </div>
     <div class="asset-name">${asset.name}</div>
+    ${asset.description ? `<div class="asset-description">${asset.description}</div>` : ''}
+    ${asset.url ? `<a class="asset-url-link" href="${asset.url}" target="_blank" rel="noopener" title="${asset.url}">🔗 View asset</a>` : ''}
     <div class="asset-tags">
       ${channelTags}
-      ${productTags}
       ${personaTags}
       ${regionTags}
       ${languageTags}
     </div>
   `;
 
-  card.addEventListener('click', () => {
+  // Edit button — open full modal
+  card.querySelector('.asset-edit-btn').addEventListener('click', e => {
+    e.stopPropagation();
     openAssetModal(asset);
   });
+
+  // Status quick-toggle
+  card.querySelector('.asset-status-btn').addEventListener('click', async e => {
+    e.stopPropagation();
+    const nextStatus = statusCycle[asset.status] || 'live';
+    await patchAssetStatus(asset, nextStatus);
+  });
+
+  // Duplicate
+  card.querySelector('.asset-dupe-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    duplicateAsset(asset);
+  });
+
+  // Card body click → edit
+  card.addEventListener('click', () => openAssetModal(asset));
 
   return card;
 }
@@ -483,9 +677,161 @@ function switchTab(tabName) {
   if (tabName === 'calendar') {
     renderCalendar();
   }
-  if (tabName === 'generator' && currentFramework) {
-    renderContentGeneratorBriefContext();
+}
+
+// ─── Channel Helpers ─────────────────────────────────────────────────────────
+
+function getFrameworkChannels() {
+  if (currentFramework?.channels?.length) return currentFramework.channels;
+  return [
+    { value: 'paid-search', label: 'Paid Search' },
+    { value: 'paid-social', label: 'Paid Social' },
+    { value: 'email', label: 'Email' },
+    { value: 'events-webinar', label: 'Events / Webinar' },
+    { value: 'content-seo', label: 'Content / SEO' },
+    { value: 'website', label: 'Website' },
+    { value: 'direct-sales', label: 'Direct Sales' }
+  ];
+}
+
+function getChannelLabel(value) {
+  const channels = getFrameworkChannels();
+  const match = channels.find(c => c.value === value || c.label === value);
+  return match ? match.label : value;
+}
+
+function buildChannelCheckboxes(selectedChannels = []) {
+  const group = document.getElementById('channelCheckboxGroup');
+  if (!group) return;
+  const channels = getFrameworkChannels();
+  group.innerHTML = channels.map(c => `
+    <label>
+      <input type="checkbox" name="channel" value="${c.value}" ${selectedChannels.includes(c.value) ? 'checked' : ''}>
+      ${c.label}
+    </label>
+  `).join('');
+}
+
+function renderChannelsEditor() {
+  const list = document.getElementById('channelsEditorList');
+  if (!list) return;
+  const channels = getFrameworkChannels();
+  list.innerHTML = '';
+  channels.forEach(c => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
+    row.innerHTML = `
+      <input type="text" class="channel-label-input" value="${c.label}" placeholder="Channel name" style="flex:1; padding:0.35rem 0.6rem; font-size:0.82rem;">
+      <button type="button" class="btn btn-secondary channel-remove-btn" style="padding:0.3rem 0.6rem; font-size:0.75rem;">✕</button>
+    `;
+    row.querySelector('.channel-remove-btn').addEventListener('click', () => row.remove());
+    list.appendChild(row);
+  });
+  document.getElementById('addChannelBtn').onclick = () => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
+    row.innerHTML = `
+      <input type="text" class="channel-label-input" value="" placeholder="e.g., Partner Marketing" style="flex:1; padding:0.35rem 0.6rem; font-size:0.82rem;">
+      <button type="button" class="btn btn-secondary channel-remove-btn" style="padding:0.3rem 0.6rem; font-size:0.75rem;">✕</button>
+    `;
+    row.querySelector('.channel-remove-btn').addEventListener('click', () => row.remove());
+    list.appendChild(row);
+    row.querySelector('input').focus();
+  };
+}
+
+function readChannelsFromEditor() {
+  const list = document.getElementById('channelsEditorList');
+  if (!list) return null;
+  const channels = [];
+  list.querySelectorAll('.channel-label-input').forEach(input => {
+    const label = input.value.trim();
+    if (label) {
+      const value = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      channels.push({ value, label });
+    }
+  });
+  return channels.length ? channels : null;
+}
+
+// ─── Persona Helpers ─────────────────────────────────────────────────────────
+
+function getFrameworkPersonas() {
+  if (currentFramework?.personas?.length) return currentFramework.personas;
+  // Generic defaults if none defined
+  return [
+    { value: 'cio', label: 'CIO' },
+    { value: 'cmo', label: 'CMO' },
+    { value: 'cdo', label: 'CDO' },
+    { value: 'ciso', label: 'CISO' },
+    { value: 'vp-marketing', label: 'VP Marketing' },
+    { value: 'marketing-manager', label: 'Marketing Manager' },
+    { value: 'demand-gen', label: 'Demand Gen Manager' },
+    { value: 'it-director', label: 'IT Director' },
+    { value: 'technical', label: 'Technical Audiences' },
+    { value: 'product-marketer', label: 'Product Marketer' },
+    { value: 'business-decision-maker', label: 'Business Decision Maker' }
+  ];
+}
+
+function getPersonaLabel(value) {
+  const personas = getFrameworkPersonas();
+  const match = personas.find(p => p.value === value || p.label === value);
+  return match ? match.label : value;
+}
+
+function buildPersonaCheckboxes(selectedPersonas = []) {
+  const group = document.getElementById('personaCheckboxGroup');
+  if (!group) return;
+  const personas = getFrameworkPersonas();
+  group.innerHTML = personas.map(p => `
+    <label>
+      <input type="checkbox" name="persona" value="${p.value}" ${selectedPersonas.includes(p.value) ? 'checked' : ''}>
+      ${p.label}
+    </label>
+  `).join('');
+}
+
+// Also rebuild the filter dropdowns when framework changes
+function rebuildPersonaFilters() {
+  const personas = getFrameworkPersonas();
+  const optionsHtml = `<option value="">All Personas</option>` +
+    personas.map(p => `<option value="${p.value}">${p.label}</option>`).join('');
+  ['flowPersonaFilter', 'journeyPersonaFilter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = optionsHtml;
+  });
+  // Content generator audience
+  const genAudience = document.getElementById('genAudience');
+  if (genAudience) {
+    genAudience.innerHTML = personas.map(p => `<option value="${p.label}">${p.label}</option>`).join('');
   }
+}
+
+function rebuildChannelFilters() {
+  // Rebuild the channel filter in Asset Repository if it exists
+  const el = document.getElementById('channelFilter');
+  if (!el) return;
+  const channels = getFrameworkChannels();
+  el.innerHTML = `<option value="">All Channels</option>` +
+    channels.map(c => `<option value="${c.value}">${c.label}</option>`).join('');
+}
+
+function buildQuarterCheckboxes(selectedQuarters = []) {
+  const group = document.getElementById('assetQuartersGroup');
+  if (!group) return;
+  const now = new Date();
+  const year = now.getFullYear();
+  const quarters = [];
+  for (let y = year - 1; y <= year + 1; y++) {
+    for (let q = 1; q <= 4; q++) quarters.push(`Q${q}-${y}`);
+  }
+  group.innerHTML = quarters.map(q => `
+    <label>
+      <input type="checkbox" name="quarter" value="${q}" ${selectedQuarters.includes(q) ? 'checked' : ''}>
+      ${q.replace('-', ' ')}
+    </label>
+  `).join('');
 }
 
 function openAssetModal(asset = null) {
@@ -499,38 +845,41 @@ function openAssetModal(asset = null) {
     // Populate form
     document.getElementById('assetType').value = asset.type;
     document.getElementById('assetName').value = asset.name;
+    document.getElementById('assetUrl').value = asset.url || '';
     document.getElementById('assetStage').value = asset.stage;
     document.getElementById('assetStatus').value = asset.status;
     document.getElementById('assetPillar').value = asset.pillar || '';
     document.getElementById('assetDescription').value = asset.description || '';
 
-    // Channels
-    document.querySelectorAll('input[name="channel"]').forEach(input => {
-      input.checked = (asset.channels || []).includes(input.value);
-    });
+    // Channels — build dynamically from framework, then pre-check
+    const assetChannels = asset.channels || (asset.channel ? [].concat(asset.channel) : []);
+    buildChannelCheckboxes(assetChannels);
 
-    // Products
-    document.querySelectorAll('input[name="product"]').forEach(input => {
-      input.checked = (asset.products || []).includes(input.value);
-    });
+    // Personas — build dynamically from framework, then pre-check
+    const assetPersonas = asset.personas || (asset.persona ? [].concat(asset.persona) : []);
+    buildPersonaCheckboxes(assetPersonas);
 
-    // Personas
-    document.querySelectorAll('input[name="persona"]').forEach(input => {
-      input.checked = (asset.personas || []).includes(input.value);
-    });
-
-    // Regions
+    // Regions — handle both singular/plural
+    const assetRegions = asset.regions || (asset.region ? [].concat(asset.region) : []);
     document.querySelectorAll('input[name="region"]').forEach(input => {
-      input.checked = (asset.regions || []).includes(input.value);
+      input.checked = assetRegions.map(r => r.toLowerCase()).includes(input.value.toLowerCase());
     });
 
-    // Languages
+    // Languages — handle both singular/plural
+    const assetLanguages = asset.languages || (asset.language ? [].concat(asset.language) : []);
     document.querySelectorAll('input[name="language"]').forEach(input => {
-      input.checked = (asset.languages || []).includes(input.value);
+      input.checked = assetLanguages.map(l => l.toLowerCase()).includes(input.value.toLowerCase());
     });
+
+    // Quarters
+    buildQuarterCheckboxes(asset.quarters || []);
   } else {
     modalTitle.textContent = 'Add New Asset';
     assetForm.reset();
+    document.getElementById('assetUrl').value = '';
+    buildChannelCheckboxes([]);
+    buildPersonaCheckboxes([]);
+    buildQuarterCheckboxes(currentQuarter ? [currentQuarter] : []);
   }
 
   assetModal.classList.add('active');
@@ -546,15 +895,16 @@ async function saveAsset() {
   const assetData = {
     type: document.getElementById('assetType').value,
     name: document.getElementById('assetName').value,
+    url: document.getElementById('assetUrl').value.trim() || null,
     stage: document.getElementById('assetStage').value,
     status: document.getElementById('assetStatus').value,
     pillar: document.getElementById('assetPillar').value || null,
     description: document.getElementById('assetDescription').value || null,
     channels: Array.from(document.querySelectorAll('input[name="channel"]:checked')).map(cb => cb.value),
-    products: Array.from(document.querySelectorAll('input[name="product"]:checked')).map(cb => cb.value),
     personas: Array.from(document.querySelectorAll('input[name="persona"]:checked')).map(cb => cb.value),
     regions: Array.from(document.querySelectorAll('input[name="region"]:checked')).map(cb => cb.value),
-    languages: Array.from(document.querySelectorAll('input[name="language"]:checked')).map(cb => cb.value)
+    languages: Array.from(document.querySelectorAll('input[name="language"]:checked')).map(cb => cb.value),
+    quarters: Array.from(document.querySelectorAll('input[name="quarter"]:checked')).map(cb => cb.value)
   };
 
   try {
@@ -599,8 +949,93 @@ async function saveAsset() {
     closeAssetModal();
   } catch (error) {
     console.error('Error saving asset:', error);
-    alert('Failed to save asset');
   }
+}
+
+// ─── Asset Quick Actions ─────────────────────────────────────────────────────
+
+async function patchAssetStatus(asset, newStatus) {
+  const updated = { ...asset, status: newStatus };
+  try {
+    const res = await fetch(`/api/campaigns/${currentProduct}/assets/${asset.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated)
+    });
+    const result = await res.json();
+    const idx = currentCampaign.assets.findIndex(a => a.id === asset.id);
+    if (idx !== -1) currentCampaign.assets[idx] = result.asset;
+    renderAssetRepository();
+    renderCampaignFlow();
+    renderContentGenerator();
+  } catch (err) {
+    console.error('Status update failed', err);
+  }
+}
+
+async function duplicateAsset(asset) {
+  const copy = {
+    ...asset,
+    id: undefined,
+    name: asset.name + ' (Copy)',
+    status: 'in-progress',
+    content: undefined,
+    createdAt: undefined
+  };
+  // Remove undefined keys
+  Object.keys(copy).forEach(k => copy[k] === undefined && delete copy[k]);
+
+  try {
+    const res = await fetch(`/api/campaigns/${currentProduct}/assets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(copy)
+    });
+    const result = await res.json();
+    if (!currentCampaign.assets) currentCampaign.assets = [];
+    currentCampaign.assets.push(result.asset);
+    renderAssetRepository();
+    showToast(`Duplicated "${asset.name}"`);
+  } catch (err) {
+    console.error('Duplicate failed', err);
+  }
+}
+
+function exportAssetsCSV() {
+  const assets = currentCampaign?.assets || [];
+  if (!assets.length) { showToast('No assets to export'); return; }
+
+  const headers = ['Name', 'Type', 'Stage', 'Status', 'URL', 'Pillar', 'Channels', 'Personas', 'Regions', 'Languages', 'Quarters', 'Launch Date', 'Description'];
+
+  const rows = assets.map(a => {
+    const channels = (a.channels || (a.channel ? [].concat(a.channel) : [])).join('; ');
+    const personas = (a.personas || (a.persona ? [].concat(a.persona) : [])).join('; ');
+    const regions  = (a.regions  || (a.region  ? [].concat(a.region)  : [])).join('; ');
+    const langs    = (a.languages || (a.language ? [].concat(a.language) : [])).join('; ');
+    const quarters = (a.quarters || []).join('; ');
+    return [
+      a.name, a.type, a.stage, a.status, a.url || '',
+      a.pillar || '', channels, personas, regions, langs, quarters,
+      a.launchDate || '', (a.description || '').replace(/\n/g, ' ')
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentProduct}-assets-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function showToast(message, duration = 2500) {
+  const toast = document.getElementById('saveToast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, duration);
 }
 
 async function saveCampaign() {
@@ -619,11 +1054,10 @@ async function saveCampaign() {
     const result = await response.json();
 
     if (result.success) {
-      alert('✅ Campaign saved successfully!');
+      showToast('✅ Campaign saved');
     }
   } catch (error) {
     console.error('Error saving campaign:', error);
-    alert('Failed to save campaign');
   }
 }
 
@@ -658,7 +1092,7 @@ async function submitFeedback() {
     const result = await response.json();
 
     if (result.success) {
-      alert('✅ Thank you for your feedback! It has been recorded.');
+      showToast('✅ Thank you for your feedback!');
       document.getElementById('feedbackModal').style.display = 'none';
       document.getElementById('feedbackForm').reset();
     } else {
@@ -666,7 +1100,7 @@ async function submitFeedback() {
     }
   } catch (error) {
     console.error('Error submitting feedback:', error);
-    alert('Failed to submit feedback: ' + error.message);
+    showToast('⚠️ Failed to submit feedback: ' + error.message, 4000);
   } finally {
     // Reset button state
     btnText.style.display = 'inline';
@@ -675,39 +1109,73 @@ async function submitFeedback() {
 }
 
 function openEditFrameworkModal() {
-  if (!currentFramework) {
-    alert('No framework loaded');
-    return;
-  }
+  if (!currentFramework) return;
 
-  // Populate header fields
   document.getElementById('editPortfolioMessage').value = currentFramework.portfolioMessage || '';
   document.getElementById('editTagline').value = currentFramework.tagline || '';
 
-  // Populate pillar fields
   const pillars = currentFramework.pillars || [];
   for (let i = 0; i < 4; i++) {
     const pillar = pillars[i] || {};
-    const pillarNum = i + 1;
-    document.getElementById(`editPillar${pillarNum}Name`).value = pillar.name || '';
-    document.getElementById(`editPillar${pillarNum}Description`).value = pillar.description || '';
+    const n = i + 1;
+    document.getElementById(`editPillar${n}Name`).value = pillar.name || '';
+    document.getElementById(`editPillar${n}Description`).value = pillar.description || '';
   }
 
-  // Populate campaign brief fields
-  const brief = currentFramework.campaignBrief || {};
-  document.getElementById('editCampaignName').value = brief.campaignName || '';
-  document.getElementById('editCampaignPeriod').value = brief.campaignPeriod || '';
-  document.getElementById('editCampaignObjective').value = brief.objective || '';
-  document.getElementById('editKeyMessages').value = brief.keyMessages || '';
-  document.getElementById('editTargetOutcomes').value = brief.targetOutcomes || '';
+  // Personas editor
+  renderPersonasEditor();
 
-  // Show modal
+  // Channels editor
+  renderChannelsEditor();
+
   document.getElementById('editFrameworkModal').style.display = 'flex';
+}
+
+function renderPersonasEditor() {
+  const list = document.getElementById('personasEditorList');
+  if (!list) return;
+  const personas = getFrameworkPersonas();
+  list.innerHTML = '';
+  personas.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
+    row.innerHTML = `
+      <input type="text" class="persona-label-input" value="${p.label}" placeholder="Persona name" style="flex:1; padding:0.35rem 0.6rem; font-size:0.82rem;">
+      <button type="button" class="btn btn-secondary persona-remove-btn" style="padding:0.3rem 0.6rem; font-size:0.75rem;">✕</button>
+    `;
+    row.querySelector('.persona-remove-btn').addEventListener('click', () => row.remove());
+    list.appendChild(row);
+  });
+  document.getElementById('addPersonaBtn').onclick = () => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:0.5rem; align-items:center;';
+    row.innerHTML = `
+      <input type="text" class="persona-label-input" value="" placeholder="e.g., VP of Engineering" style="flex:1; padding:0.35rem 0.6rem; font-size:0.82rem;">
+      <button type="button" class="btn btn-secondary persona-remove-btn" style="padding:0.3rem 0.6rem; font-size:0.75rem;">✕</button>
+    `;
+    row.querySelector('.persona-remove-btn').addEventListener('click', () => row.remove());
+    list.appendChild(row);
+    row.querySelector('input').focus();
+  };
+}
+
+function readPersonasFromEditor() {
+  const list = document.getElementById('personasEditorList');
+  if (!list) return null;
+  const personas = [];
+  list.querySelectorAll('.persona-label-input').forEach(input => {
+    const label = input.value.trim();
+    if (label) {
+      const value = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      personas.push({ value, label });
+    }
+  });
+  return personas.length ? personas : null;
 }
 
 async function saveFrameworkEdits() {
   if (!currentProduct) {
-    alert('No product selected');
+    showToast('No product selected', 3000);
     return;
   }
 
@@ -739,24 +1207,10 @@ async function saveFrameworkEdits() {
   btnSpinner.style.display = 'inline';
 
   try {
-    // Get campaign brief values
-    const campaignBrief = {
-      campaignName: document.getElementById('editCampaignName').value,
-      campaignPeriod: document.getElementById('editCampaignPeriod').value,
-      objective: document.getElementById('editCampaignObjective').value,
-      keyMessages: document.getElementById('editKeyMessages').value,
-      targetOutcomes: document.getElementById('editTargetOutcomes').value
-    };
-
     const response = await fetch(`/api/frameworks/${currentProduct}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        portfolioMessage,
-        tagline,
-        pillars,
-        campaignBrief
-      })
+      body: JSON.stringify({ portfolioMessage, tagline, pillars, personas: readPersonasFromEditor() || currentFramework.personas, channels: readChannelsFromEditor() || currentFramework.channels })
     });
 
     const result = await response.json();
@@ -771,14 +1225,12 @@ async function saveFrameworkEdits() {
 
       // Cascade updates to all tabs
       propagateFrameworkUpdate();
-
-      alert('✅ Framework & brief updated successfully!');
     } else {
       throw new Error(result.error || 'Framework update failed');
     }
   } catch (error) {
     console.error('Error updating framework:', error);
-    alert('Failed to update framework: ' + error.message);
+    showToast('⚠️ Failed to update framework: ' + error.message, 4000);
   } finally {
     // Reset button state
     btnText.style.display = 'inline';
@@ -798,9 +1250,7 @@ function propagateFrameworkUpdate() {
   // Re-render campaign flow (uses currentFramework for stage labels)
   renderCampaignFlow();
 
-  // Update campaign context panel in content generator
   renderContentGenerator();
-  renderContentGeneratorBriefContext();
 
   // Reload assets in journey map
   if (typeof journeyMap !== 'undefined' && journeyMap) {
@@ -822,111 +1272,523 @@ function propagateFrameworkUpdate() {
     `;
     tab.insertAdjacentElement('afterbegin', banner);
   });
+
+  // Prompt user to generate new assets aligned with updated messaging
+  setTimeout(() => showAssetSuggestions(), 400);
 }
 
-function renderContentGeneratorBriefContext() {
-  const panel = document.getElementById('generatorBriefContext');
-  if (!panel || !currentFramework) return;
+// ─── Quarter Tabs ────────────────────────────────────────────────────────────
 
-  const brief = currentFramework.campaignBrief || {};
-  const hasContext = brief.campaignName || brief.objective || brief.keyMessages;
+function renderQuarterTabs() {
+  const sel = document.getElementById('quarterDropdown');
+  if (!sel || !currentCampaign) return;
+  const active = currentCampaign.activeQuarters || [];
+  sel.innerHTML = `<option value="">All Quarters</option>` +
+    active.map(q => `<option value="${q}" ${currentQuarter === q ? 'selected' : ''}>${q.replace('-', ' ')}</option>`).join('');
+  if (!currentQuarter) sel.value = '';
+}
 
-  if (!hasContext) {
-    panel.style.display = 'none';
+function openAddQuarterModal() {
+  const active = new Set(currentCampaign.activeQuarters || []);
+  const now = new Date();
+  const year = now.getFullYear();
+  const sel = document.getElementById('newQuarterSelect');
+  sel.innerHTML = '';
+  for (let y = year; y <= year + 1; y++) {
+    for (let q = 1; q <= 4; q++) {
+      const val = `Q${q}-${y}`;
+      if (!active.has(val)) {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = `Q${q} ${y}`;
+        sel.appendChild(opt);
+      }
+    }
+  }
+  if (!sel.options.length) {
+    showToast('All quarters for this year and next are already added.', 3000);
+    return;
+  }
+  updateAddQuarterPrompt();
+  document.getElementById('addQuarterModal').style.display = 'flex';
+}
+
+function updateAddQuarterPrompt() {
+  const hasCurrentQuarter = !!currentQuarter;
+  const dupPrompt = document.getElementById('duplicateFromPrompt');
+  const noDropPrompt = document.getElementById('noDuplicatePrompt');
+  if (hasCurrentQuarter) {
+    document.getElementById('duplicateFromLabel').textContent = currentQuarter.replace('-', ' ');
+    dupPrompt.style.display = 'block';
+    noDropPrompt.style.display = 'none';
+  } else {
+    dupPrompt.style.display = 'none';
+    noDropPrompt.style.display = 'block';
+  }
+}
+
+function addQuarterToList(quarter, switchToIt = true) {
+  if (!quarter) return;
+  if (!currentCampaign.activeQuarters) currentCampaign.activeQuarters = [];
+  if (!currentCampaign.activeQuarters.includes(quarter)) {
+    currentCampaign.activeQuarters.push(quarter);
+    currentCampaign.activeQuarters.sort();
+  }
+  document.getElementById('addQuarterModal').style.display = 'none';
+  if (switchToIt) {
+    currentQuarter = quarter;
+    calendarQuarterOffset = 0;
+  }
+  renderQuarterTabs();
+  const sel = document.getElementById('quarterDropdown');
+  if (sel && currentQuarter) sel.value = currentQuarter;
+  applyQuarterFilter();
+}
+
+function applyQuarterFilter() {
+  renderFramework();
+  renderAssetRepository();
+  renderCampaignFlow();
+  renderContentGenerator();
+  if (typeof journeyMap !== 'undefined' && journeyMap) {
+    journeyMap.loadAssets(getQuarterFilteredAssets(currentCampaign.assets || []));
+  }
+  // Sync calendar quarter offset to selected quarter
+  if (currentQuarter) {
+    const [qPart, yPart] = currentQuarter.split('-');
+    const q = parseInt(qPart.replace('Q', '')) - 1;
+    const y = parseInt(yPart);
+    const now = new Date();
+    const baseQ = Math.floor(now.getMonth() / 3);
+    const baseY = now.getFullYear();
+    calendarQuarterOffset = (y - baseY) * 4 + (q - baseQ);
+  } else {
+    calendarQuarterOffset = 0;
+  }
+}
+
+// ─── Campaign Brief ──────────────────────────────────────────────────────────
+
+function openCampaignBriefModal() {
+  const modal = document.getElementById('campaignBriefModal');
+  const textarea = document.getElementById('briefContentInput');
+  if (textarea) textarea.value = currentFramework.campaignBrief?.content || '';
+
+  // Show quarter theme field if a quarter is selected
+  const themeSection = document.getElementById('quarterThemeSection');
+  const themeLabel = document.getElementById('quarterThemeLabel');
+  const themeInput = document.getElementById('quarterThemeInput');
+  if (currentQuarter && themeSection && themeInput) {
+    themeSection.style.display = 'block';
+    themeLabel.textContent = `for ${currentQuarter}`;
+    themeInput.value = (currentFramework.quarterlyThemes || {})[currentQuarter] || '';
+  } else if (themeSection) {
+    themeSection.style.display = 'none';
+  }
+
+  modal.style.display = 'flex';
+}
+
+async function saveCampaignBrief() {
+  const content = document.getElementById('briefContentInput').value;
+  const themeInput = document.getElementById('quarterThemeInput');
+  const themeSection = document.getElementById('quarterThemeSection');
+
+  const updates = {
+    campaignBrief: { content }
+  };
+
+  // Save quarter theme if visible
+  if (currentQuarter && themeSection && themeSection.style.display !== 'none' && themeInput) {
+    const themes = { ...(currentFramework.quarterlyThemes || {}), [currentQuarter]: themeInput.value };
+    updates.quarterlyThemes = themes;
+  }
+
+  try {
+    const response = await fetch(`/api/frameworks/${currentProduct}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    const result = await response.json();
+    if (result.success) {
+      currentFramework = result.framework;
+      document.getElementById('campaignBriefModal').style.display = 'none';
+      propagateFrameworkUpdate();
+    }
+  } catch (err) {
+    showToast('⚠️ Failed to save brief: ' + err.message, 4000);
+  }
+}
+
+function useTemplate() {
+  const pillars = (currentFramework?.pillars || []).map(p => p.name);
+  const product = currentFramework?.name || 'Product';
+  const template = `CAMPAIGN BRIEF
+
+Campaign Name: [Name]
+Quarter: [Q# YYYY]
+Campaign Period: [Start Date] – [End Date]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CAMPAIGN OBJECTIVE
+[What is the primary goal? e.g., Generate 500 MQLs, increase brand awareness by 30%]
+
+TARGET AUDIENCE
+Primary: [e.g., CIOs at enterprise companies with 1,000+ employees]
+Secondary: [e.g., IT Architects and Technical Decision Makers]
+
+KEY MESSAGES
+${pillars.length ? pillars.map((p, i) => `${i + 1}. [Message aligned with: ${p}]`).join('\n') : '1. [Core message]\n2. [Core message]\n3. [Core message]'}
+${pillars.length + 1}. [Proof point / differentiator]
+
+CAMPAIGN THEME / HOOK
+[The narrative angle for this quarter, e.g., "AI Readiness Starts Here"]
+
+SUCCESS METRICS (KPIs)
+• MQLs: [target]
+• Pipeline: [target]
+• Awareness lift: [target]
+• Content engagement: [target]
+
+CHANNELS
+☐ Email  ☐ SEM/Paid  ☐ Content Syndication  ☐ Webinar
+☐ Social  ☐ Field Events  ☐ Partner  ☐ SDR Outreach
+
+BUDGET
+[Campaign budget if applicable]
+
+NOTES / CONSTRAINTS
+[Any additional context, dependencies, or constraints]`;
+
+  document.getElementById('briefContentInput').value = template;
+}
+
+function handleBriefFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    document.getElementById('briefContentInput').value = evt.target.result;
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset so same file can be re-uploaded
+}
+
+// ─── Asset Suggestions ───────────────────────────────────────────────────────
+
+function buildAssetSuggestions() {
+  if (!currentFramework) return [];
+  const pillars = currentFramework.pillars || [];
+  const portfolio = currentFramework.portfolioMessage || currentFramework.name || 'Platform';
+  const brief = currentFramework.campaignBrief?.content || '';
+  const qSuffix = currentQuarter ? ` — ${currentQuarter}` : '';
+
+  return [
+    {
+      type: 'WHITEPAPER',
+      stage: 'awareness',
+      name: `${pillars[0]?.name || portfolio} Executive Guide${qSuffix}`,
+      reason: 'Top-of-funnel asset to establish thought leadership with your primary pillar',
+      pillar: pillars[0]?.id
+    },
+    {
+      type: 'WEBPAGE',
+      stage: 'awareness',
+      name: `${portfolio} Solution Overview Landing Page${qSuffix}`,
+      reason: 'Central landing page anchoring all campaign traffic to the updated messaging',
+      pillar: null
+    },
+    {
+      type: 'BLOG POST',
+      stage: 'familiarity',
+      name: `How ${pillars[1]?.name || portfolio} Transforms Your Business${qSuffix}`,
+      reason: 'SEO-friendly content to drive organic awareness for Pillar 2',
+      pillar: pillars[1]?.id
+    },
+    {
+      type: 'SOLUTION BRIEF',
+      stage: 'familiarity',
+      name: `${pillars[2]?.name || portfolio} Datasheet${qSuffix}`,
+      reason: 'Short-form asset for prospects who need quick spec-level proof',
+      pillar: pillars[2]?.id
+    },
+    {
+      type: 'WEBINAR',
+      stage: 'consideration',
+      name: `${portfolio} Deep-Dive Webinar${qSuffix}`,
+      reason: 'Mid-funnel engagement event aligned with updated messaging',
+      pillar: pillars[1]?.id
+    },
+    {
+      type: 'NEWSLETTER',
+      stage: 'decision',
+      name: `${pillars[3]?.name || portfolio} ROI Email Series${qSuffix}`,
+      reason: 'Bottom-funnel nurture sequence to convert warm leads to pipeline',
+      pillar: pillars[3]?.id
+    }
+  ];
+}
+
+function showAssetSuggestions() {
+  const modal = document.getElementById('assetSuggestionsModal');
+  const list = document.getElementById('assetSuggestionsList');
+  if (!modal || !list) return;
+
+  const suggestions = buildAssetSuggestions();
+
+  list.innerHTML = suggestions.map((s, i) => `
+    <div class="suggestion-item">
+      <label class="suggestion-checkbox">
+        <input type="checkbox" name="suggestion" value="${i}" checked>
+        <span class="suggestion-icon">${getAssetIcon(s.type)}</span>
+        <div class="suggestion-details">
+          <div class="suggestion-name">${s.name}</div>
+          <div class="suggestion-meta">
+            <span class="suggestion-type">${s.type}</span>
+            <span class="suggestion-stage ${s.stage}">${s.stage}</span>
+          </div>
+          <div class="suggestion-reason">${s.reason}</div>
+        </div>
+      </label>
+    </div>
+  `).join('');
+
+  document.getElementById('suggestionsGenerating').style.display = 'none';
+  document.getElementById('generateSuggestedBtn').style.display = 'inline-block';
+  document.querySelector('.suggestions-close').style.display = 'inline-block';
+  modal.style.display = 'flex';
+}
+
+async function generateSuggestedAssets() {
+  const checked = Array.from(document.querySelectorAll('input[name="suggestion"]:checked')).map(cb => parseInt(cb.value));
+  if (checked.length === 0) { showToast('Select at least one asset to generate.', 3000); return; }
+
+  const suggestions = buildAssetSuggestions();
+  const selected = checked.map(i => suggestions[i]);
+
+  const progress = document.getElementById('suggestionsProgress');
+  const generating = document.getElementById('suggestionsGenerating');
+  const generateBtn = document.getElementById('generateSuggestedBtn');
+  const skipBtn = document.querySelector('.suggestions-close');
+
+  generating.style.display = 'block';
+  generateBtn.style.display = 'none';
+  skipBtn.style.display = 'none';
+  document.getElementById('assetSuggestionsList').style.display = 'none';
+
+  let created = 0;
+  for (const s of selected) {
+    progress.textContent = `Generating ${s.type}: ${s.name} (${created + 1}/${selected.length})…`;
+    try {
+      const response = await fetch('/api/generate-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: currentProduct,
+          contentType: s.type,
+          stage: s.stage.toUpperCase(),
+          audience: 'Enterprise Leaders',
+          customPrompt: s.name
+        })
+      });
+      const result = await response.json();
+      if (result.success) {
+        // Add quarter assignment to generated asset
+        const assetWithQuarter = {
+          ...result.asset,
+          pillar: s.pillar || null,
+          quarters: currentQuarter ? [currentQuarter] : []
+        };
+        if (!currentCampaign.assets) currentCampaign.assets = [];
+        currentCampaign.assets.push(assetWithQuarter);
+        created++;
+      }
+    } catch (err) {
+      console.error('Failed to generate:', s.name, err);
+    }
+  }
+
+  progress.textContent = `✅ Generated ${created} asset${created !== 1 ? 's' : ''}! Refreshing views…`;
+  setTimeout(() => {
+    document.getElementById('assetSuggestionsModal').style.display = 'none';
+    document.getElementById('assetSuggestionsList').style.display = 'block';
+    renderAssetRepository();
+    renderCampaignFlow();
+    renderContentGenerator();
+    if (typeof journeyMap !== 'undefined' && journeyMap) {
+      journeyMap.loadAssets(currentCampaign.assets || []);
+    }
+  }, 1200);
+}
+
+// ─── Duplicate Quarter ───────────────────────────────────────────────────────
+
+function openDuplicateQuarterModal(sourceQ, targetQ) {
+  const sourceQuarter = sourceQ || currentQuarter;
+  if (!sourceQuarter) {
+    showToast('Select a source quarter first.', 3000);
     return;
   }
 
-  panel.style.display = 'block';
-  panel.innerHTML = `
-    <div class="generator-context-header">
-      <h4>📄 Campaign Context</h4>
-      <span class="context-from-brief">From Campaign Brief</span>
+  // Derive target if not provided
+  let nextQuarter = targetQ;
+  if (!nextQuarter) {
+    const [qPart, yPart] = sourceQuarter.split('-');
+    const q = parseInt(qPart.replace('Q', ''));
+    const y = parseInt(yPart);
+    const nextQ = q === 4 ? 1 : q + 1;
+    const nextY = q === 4 ? y + 1 : y;
+    nextQuarter = `Q${nextQ}-${nextY}`;
+  }
+
+  const modal = document.getElementById('duplicateQuarterModal');
+  const content = document.getElementById('duplicateQuarterContent');
+
+  // Temporarily filter as if sourceQuarter is selected
+  const savedQuarter = currentQuarter;
+  currentQuarter = sourceQuarter;
+  const quarterAssets = getQuarterFilteredAssets(currentCampaign.assets || []);
+  currentQuarter = savedQuarter;
+
+  content.innerHTML = `
+    <div style="margin-bottom: 1.5rem;">
+      <p>Duplicate <strong>${sourceQuarter.replace('-', ' ')}</strong> → <strong>${nextQuarter.replace('-', ' ')}</strong></p>
+      <p style="color:var(--text-muted); font-size:0.875rem; margin-top:0.5rem;">
+        ${quarterAssets.length} asset${quarterAssets.length !== 1 ? 's' : ''} will be copied. Statuses reset to "In Progress". Uncheck any you don't want to carry forward.
+      </p>
     </div>
-    <div class="generator-context-body">
-      ${brief.campaignName ? `<div class="context-row"><strong>Campaign:</strong> ${brief.campaignName}${brief.campaignPeriod ? ` &nbsp;·&nbsp; ${brief.campaignPeriod}` : ''}</div>` : ''}
-      ${brief.objective ? `<div class="context-row"><strong>Objective:</strong> ${brief.objective}</div>` : ''}
-      ${brief.keyMessages ? `<div class="context-row"><strong>Key Messages:</strong><div class="context-messages">${brief.keyMessages.replace(/\n/g, '<br>')}</div></div>` : ''}
-      ${brief.targetOutcomes ? `<div class="context-row"><strong>KPIs:</strong> ${brief.targetOutcomes}</div>` : ''}
+    <input type="hidden" id="duplicateTargetQuarter" value="${nextQuarter}">
+    <div class="duplicate-asset-list">
+      ${quarterAssets.length === 0
+        ? '<p style="color:var(--text-muted);">No assets assigned to this quarter yet.</p>'
+        : quarterAssets.map((a, i) => `
+          <label class="duplicate-asset-row">
+            <input type="checkbox" name="duplicateAsset" value="${a.id}" checked>
+            <span class="asset-icon">${getAssetIcon(a.type)}</span>
+            <div>
+              <div class="duplicate-asset-name">${a.name}</div>
+              <div class="duplicate-asset-meta">${a.type} · ${a.stage}</div>
+            </div>
+          </label>
+        `).join('')}
     </div>
   `;
+
+  modal.style.display = 'flex';
+}
+
+async function confirmDuplicateQuarter() {
+  const targetQuarter = document.getElementById('duplicateTargetQuarter').value;
+  const selectedIds = Array.from(document.querySelectorAll('input[name="duplicateAsset"]:checked')).map(cb => cb.value);
+  if (selectedIds.length === 0) { showToast('Select at least one asset to duplicate.', 3000); return; }
+
+  const assetsToDuplicate = (currentCampaign.assets || []).filter(a => selectedIds.includes(a.id));
+
+  const newAssets = assetsToDuplicate.map(a => ({
+    ...a,
+    id: `asset-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+    status: 'in-progress',
+    quarters: [...new Set([...(a.quarters || []).filter(q => q !== currentQuarter), targetQuarter])],
+    createdAt: new Date().toISOString(),
+    launchDate: null,
+    content: null
+  }));
+
+  if (!currentCampaign.assets) currentCampaign.assets = [];
+  currentCampaign.assets.push(...newAssets);
+
+  try {
+    await fetch(`/api/campaigns/${currentProduct}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentCampaign)
+    });
+    document.getElementById('duplicateQuarterModal').style.display = 'none';
+    // Add and switch to the new quarter
+    addQuarterToList(targetQuarter, true);
+    showToast(`✅ Duplicated ${newAssets.length} assets to ${targetQuarter.replace('-', ' ')}`);
+  } catch (err) {
+    showToast('⚠️ Failed to save duplicated assets: ' + err.message, 4000);
+  }
+}
+
+
+const DEFAULT_FLOW_STAGES = {
+  'awareness': { label: 'AWARENESS', subtitle: 'First touch' },
+  'hero_asset': { label: 'HERO CONTENT', subtitle: 'Flagship offer' },
+  'conversion': { label: 'CONVERSION', subtitle: 'Capture lead' },
+  'conversion_confirmation': { label: 'THANK YOU', subtitle: 'Confirmation' },
+  'nurture_day1': { label: 'DAY 1', subtitle: 'Welcome series' },
+  'nurture_day3': { label: 'DAY 3', subtitle: 'Value demo' },
+  'nurture_day7': { label: 'DAY 7', subtitle: 'Use case deep-dive' },
+  'nurture_day14': { label: 'DAY 14', subtitle: 'Social proof' },
+  'nurture_day21': { label: 'DAY 21', subtitle: 'Event invite' },
+  'engagement_registration': { label: 'WEBINAR REG', subtitle: 'Sign up' },
+  'engagement_event': { label: 'LIVE EVENT', subtitle: 'Webinar/demo' },
+  'engagement_followup': { label: 'FOLLOW-UP', subtitle: 'Recording & resources' },
+  'decision_demo_offer': { label: 'DEMO REQUEST', subtitle: 'Sales handoff' },
+  'decision_proof': { label: 'PROOF POINTS', subtitle: 'ROI & case studies' }
+};
+
+function renderFlowStageCard(stageKey, stage, container) {
+  const stageDiv = document.createElement('div');
+  stageDiv.className = 'flow-stage-edit-card';
+  stageDiv.dataset.stageKey = stageKey;
+  stageDiv.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+      <span class="flow-stage-key-badge">${stageKey}</span>
+      <button type="button" class="flow-remove-stage-btn" title="Remove this touchpoint">✕</button>
+    </div>
+    <div class="form-group" style="margin-bottom:0.5rem;">
+      <label>Label</label>
+      <input type="text" class="flow-stage-label-input" value="${stage.label}" placeholder="e.g., AWARENESS">
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label>Subtitle</label>
+      <input type="text" class="flow-stage-subtitle-input" value="${stage.subtitle}" placeholder="e.g., First touch">
+    </div>
+  `;
+  stageDiv.querySelector('.flow-remove-stage-btn').addEventListener('click', () => {
+    stageDiv.remove();
+  });
+  container.appendChild(stageDiv);
 }
 
 function openEditFlowModal() {
-  if (!currentFramework) {
-    alert('No framework loaded');
-    return;
-  }
+  if (!currentFramework) return;
 
-  // Get default flow stages
-  const defaultFlowStages = {
-    'acquisition': { label: 'ACQUISITION', subtitle: 'Drive traffic' },
-    'hero_asset': { label: 'HERO ASSET', subtitle: 'Core content offer' },
-    'conversion': { label: 'CONVERSION', subtitle: 'Capture lead' },
-    'conversion_confirmation': { label: 'CONFIRMATION', subtitle: 'Thank you' },
-    'nurture_day1': { label: 'NURTURE - Day 1', subtitle: 'Welcome' },
-    'nurture_day3': { label: 'NURTURE - Day 3', subtitle: 'Follow-up' },
-    'nurture_day7': { label: 'NURTURE - Day 7', subtitle: 'Education' },
-    'nurture_day14': { label: 'NURTURE - Day 14', subtitle: 'Engagement' },
-    'nurture_day21': { label: 'NURTURE - Day 21', subtitle: 'Event invite' },
-    'engagement_registration': { label: 'WEBINAR REG', subtitle: 'Sign up' },
-    'engagement_event': { label: 'WEBINAR', subtitle: 'Live event' },
-    'engagement_followup': { label: 'POST-WEBINAR', subtitle: 'Recording' },
-    'decision_demo_offer': { label: 'DEMO OFFER', subtitle: 'Sales handoff' },
-    'decision_proof': { label: 'PROOF', subtitle: 'Case study' }
-  };
-
-  // Use stored flow stages if they exist, otherwise use defaults
-  const flowStages = currentFramework.flowStages || defaultFlowStages;
-
-  // Populate flow stages in the modal
+  const flowStages = currentFramework.flowStages || DEFAULT_FLOW_STAGES;
   const container = document.getElementById('flowStagesContainer');
   container.innerHTML = '';
 
   Object.keys(flowStages).forEach(stageKey => {
-    const stage = flowStages[stageKey];
-    const stageDiv = document.createElement('div');
-    stageDiv.style.cssText = 'border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-sm); background: var(--bg-secondary);';
-    stageDiv.innerHTML = `
-      <div class="form-group">
-        <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">Stage: ${stageKey}</label>
-        <small style="color: var(--text-muted); display: block; margin-bottom: 0.75rem; font-size: 0.75rem;">
-          This is the internal identifier for this stage
-        </small>
-        <label>Label *</label>
-        <input type="text" id="flow_${stageKey}_label" value="${stage.label}" required placeholder="e.g., ACQUISITION" style="margin-bottom: 0.75rem;">
-        <label>Subtitle *</label>
-        <input type="text" id="flow_${stageKey}_subtitle" value="${stage.subtitle}" required placeholder="e.g., Drive traffic">
-      </div>
-    `;
-    container.appendChild(stageDiv);
+    renderFlowStageCard(stageKey, flowStages[stageKey], container);
   });
 
-  // Show modal
+  // Add Stage button
+  const addBtn = document.getElementById('addFlowStageBtn');
+  addBtn.onclick = () => {
+    const key = `custom_${Date.now()}`;
+    renderFlowStageCard(key, { label: 'NEW STAGE', subtitle: 'Description' }, container);
+  };
+
   document.getElementById('editFlowModal').style.display = 'flex';
 }
 
 async function saveFlowEdits() {
-  if (!currentProduct) {
-    alert('No product selected');
-    return;
-  }
+  if (!currentProduct) return;
 
-  // Get default flow stage keys
-  const stageKeys = [
-    'acquisition', 'hero_asset', 'conversion', 'conversion_confirmation',
-    'nurture_day1', 'nurture_day3', 'nurture_day7', 'nurture_day14', 'nurture_day21',
-    'engagement_registration', 'engagement_event', 'engagement_followup',
-    'decision_demo_offer', 'decision_proof'
-  ];
-
-  // Build flow stages object from form
+  // Read all stage cards from the modal
+  const container = document.getElementById('flowStagesContainer');
   const flowStages = {};
-  stageKeys.forEach(stageKey => {
-    const label = document.getElementById(`flow_${stageKey}_label`)?.value;
-    const subtitle = document.getElementById(`flow_${stageKey}_subtitle`)?.value;
-
-    if (label && subtitle) {
-      flowStages[stageKey] = { label, subtitle };
+  container.querySelectorAll('.flow-stage-edit-card').forEach(card => {
+    const key = card.dataset.stageKey;
+    const label = card.querySelector('.flow-stage-label-input')?.value?.trim();
+    const subtitle = card.querySelector('.flow-stage-subtitle-input')?.value?.trim();
+    if (key && label) {
+      flowStages[key] = { label, subtitle: subtitle || '' };
     }
   });
 
@@ -956,13 +1818,13 @@ async function saveFlowEdits() {
       document.getElementById('editFlowModal').style.display = 'none';
       document.getElementById('editFlowForm').reset();
 
-      alert('✅ Campaign flow updated successfully!');
+      showToast('✅ Campaign flow updated');
     } else {
       throw new Error(result.error || 'Flow update failed');
     }
   } catch (error) {
     console.error('Error updating flow:', error);
-    alert('Failed to update flow: ' + error.message);
+    showToast('⚠️ Failed to update flow: ' + error.message, 4000);
   } finally {
     // Reset button state
     btnText.style.display = 'inline';
@@ -972,7 +1834,7 @@ async function saveFlowEdits() {
 
 async function generateNewContent() {
   if (!currentProduct) {
-    alert('Please select a product first');
+    showToast('Please select a product first', 3000);
     return;
   }
 
@@ -982,11 +1844,10 @@ async function generateNewContent() {
   const customPrompt = document.getElementById('genPrompt').value;
 
   if (!contentType) {
-    alert('Please select a content type');
+    showToast('Please select a content type', 3000);
     return;
   }
 
-  // Show loading state
   const btnText = document.getElementById('generateBtnText');
   const btnSpinner = document.getElementById('generateBtnSpinner');
   btnText.style.display = 'none';
@@ -996,44 +1857,60 @@ async function generateNewContent() {
     const response = await fetch('/api/generate-content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product: currentProduct,
-        contentType,
-        stage,
-        audience,
-        customPrompt
-      })
+      body: JSON.stringify({ product: currentProduct, contentType, stage, audience, customPrompt })
     });
 
     const result = await response.json();
 
-    if (result.success) {
-      // Add the new asset to the current campaign
-      if (!currentCampaign.assets) {
-        currentCampaign.assets = [];
-      }
-      currentCampaign.assets.push(result.asset);
+    if (result.error === 'API key not configured') {
+      showApiKeyBanner();
+      return;
+    }
 
-      // Reset form
-      document.getElementById('generateContentForm').reset();
-      document.getElementById('genStage').value = 'AWARENESS';
-      document.getElementById('genAudience').value = 'Enterprise Leaders';
-
-      // Refresh the content generator view
-      renderContentGenerator();
-
-      alert('✅ Content generated successfully!');
-    } else {
+    if (!result.success) {
       throw new Error(result.error || 'Content generation failed');
     }
+
+    // Asset is already persisted server-side — sync local state
+    if (!currentCampaign.assets) currentCampaign.assets = [];
+    currentCampaign.assets.push(result.asset);
+
+    document.getElementById('generateContentForm').reset();
+    document.getElementById('genStage').value = 'AWARENESS';
+    if (document.getElementById('genAudience').options.length > 0) {
+      document.getElementById('genAudience').selectedIndex = 0;
+    }
+
+    renderContentGenerator();
+    showToast('✅ Content generated and saved to Asset Repository');
   } catch (error) {
     console.error('Error generating content:', error);
-    alert('Failed to generate content: ' + error.message);
+    showToast('⚠️ Generation failed: ' + error.message, 4000);
   } finally {
-    // Reset button state
     btnText.style.display = 'inline';
     btnSpinner.style.display = 'none';
   }
+}
+
+function showApiKeyBanner() {
+  const existing = document.getElementById('apiKeyBanner');
+  if (existing) return;
+  const banner = document.createElement('div');
+  banner.id = 'apiKeyBanner';
+  banner.style.cssText = 'margin:1rem 0;padding:1.25rem 1.5rem;background:#fff8e1;border:2px solid #f59e0b;border-radius:8px;';
+  banner.innerHTML = `
+    <strong style="font-size:1rem;">⚠️ ANTHROPIC_API_KEY not set</strong>
+    <p style="margin:0.5rem 0 0.25rem 0;">Content generation requires an Anthropic API key. To set it up:</p>
+    <ol style="margin:0.5rem 0 0.5rem 1.25rem;font-size:0.9rem;">
+      <li>Get a free API key at <strong>console.anthropic.com</strong></li>
+      <li>Create a <code>.env</code> file in the project root (copy from <code>.env.example</code>)</li>
+      <li>Add: <code>ANTHROPIC_API_KEY=sk-ant-...</code></li>
+      <li>Restart the server: <code>npm start</code></li>
+    </ol>
+    <button onclick="document.getElementById('apiKeyBanner').remove()" style="background:none;border:none;cursor:pointer;font-size:0.875rem;color:#92400e;text-decoration:underline;">Dismiss</button>
+  `;
+  const form = document.getElementById('generateContentForm');
+  form.parentNode.insertBefore(banner, form);
 }
 
 function renderContentGenerator() {
@@ -1047,8 +1924,9 @@ function renderContentGenerator() {
     'decision': { label: 'Decision', subtitle: 'Bottom of Funnel - Making the Purchase' }
   };
 
+  const filteredForGenerator = getQuarterFilteredAssets(currentCampaign.assets || []);
   Object.keys(stages).forEach(stageKey => {
-    const stageAssets = (currentCampaign.assets || []).filter(a => a.stage === stageKey);
+    const stageAssets = filteredForGenerator.filter(a => a.stage === stageKey);
 
     if (stageAssets.length === 0) return;
 
@@ -1073,11 +1951,11 @@ function renderContentGenerator() {
     contentList.appendChild(stageSection);
   });
 
-  if ((currentCampaign.assets || []).length === 0) {
+  if (filteredForGenerator.length === 0) {
     contentList.innerHTML = `
       <div class="empty-content-state">
-        <h3>No Assets Yet</h3>
-        <p>Add assets in the Asset Repository tab to see content previews here.</p>
+        <h3>${currentQuarter ? `No Assets in ${currentQuarter}` : 'No Assets Yet'}</h3>
+        <p>${currentQuarter ? 'No assets are assigned to this quarter yet.' : 'Add assets in the Asset Repository tab to see content previews here.'}</p>
       </div>
     `;
   }
@@ -1138,7 +2016,7 @@ function createContentPreview(asset) {
   if (generateBtn) {
     generateBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      alert('Content generation coming soon! For now, check the System of Context campaign for examples.');
+      showToast('Use the Generate Content form above to create this asset', 3000);
     });
   }
 
@@ -1325,8 +2203,8 @@ function renderCampaignFlow() {
   const regionFilter = document.getElementById('flowRegionFilter')?.value || '';
   const languageFilter = document.getElementById('flowLanguageFilter')?.value || '';
 
-  // Filter assets
-  let filteredAssets = currentCampaign.assets;
+  // Filter assets — quarter first, then persona/region/language
+  let filteredAssets = getQuarterFilteredAssets(currentCampaign.assets);
 
   if (personaFilter) {
     filteredAssets = filteredAssets.filter(a => (a.personas || []).includes(personaFilter));
@@ -1575,7 +2453,7 @@ function renderMonthCalendar(container, assets) {
           ${dayAssets.map(asset => `
             <div class="calendar-asset" data-asset-id="${asset.id}" title="${asset.name}">
               <span class="calendar-asset-type">${getAssetIcon(asset.type)}</span>
-              <span class="calendar-asset-name">${asset.name}</span>
+              <span class="calendar-asset-name">${asset.name.length > 22 ? asset.name.substring(0, 22) + '…' : asset.name}</span>
             </div>
           `).join('')}
         </div>
@@ -1676,8 +2554,8 @@ function renderQuarterCalendar(container, assets) {
 
   const weekHeaders = weeks.map((w, i) => {
     const isMonthBoundary = i === 0 || w.start.getMonth() !== weeks[i - 1].start.getMonth();
-    const label = isMonthBoundary ? monthNames[w.start.getMonth()] : `${i + 1}`;
-    return `<div class="qw-week-header ${isMonthBoundary ? 'month-boundary' : ''}" title="${w.start.toLocaleDateString()} – ${w.end.toLocaleDateString()}">${label}</div>`;
+    const monthLabel = isMonthBoundary ? `<div class="qw-month-label">${monthNames[w.start.getMonth()]}</div>` : '<div class="qw-month-label"></div>';
+    return `<div class="qw-week-header" title="${w.start.toLocaleDateString(undefined,{month:'short',day:'numeric'})} – ${w.end.toLocaleDateString(undefined,{month:'short',day:'numeric'})}">${monthLabel}<div class="qw-week-num">W${i + 1}</div></div>`;
   }).join('');
 
   const stageSummary = stages.map(stage => {
@@ -1791,7 +2669,7 @@ function formatDate(dateStr) {
 
 function exportCalendarToSlides() {
   if (!currentCampaign || !currentCampaign.assets || currentCampaign.assets.length === 0) {
-    alert('No campaign assets to export');
+    showToast('No campaign assets to export', 3000);
     return;
   }
 
@@ -1806,7 +2684,7 @@ function exportCalendarToSlides() {
   <title>${productName} Campaign Calendar</title>
   <style>
     body {
-      font-family: 'Salesforce Sans', Arial, sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       background: #f3f3f3;
@@ -1974,7 +2852,7 @@ function exportCalendarToSlides() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  alert('✅ Calendar exported! Open the downloaded HTML file and print to PDF or copy-paste slides into Google Slides.');
+  showToast('✅ Exported — open the HTML file and print to PDF or paste into Google Slides', 4000);
 }
 
 function generateAssetTimelineSlides(assets, productName) {
@@ -2053,7 +2931,7 @@ function generateAssetDetailSlides(assets, productName) {
 
 function downloadCalendar() {
   if (!currentCampaign || !currentCampaign.assets || currentCampaign.assets.length === 0) {
-    alert('No campaign assets to download');
+    showToast('No campaign assets to download', 3000);
     return;
   }
 
@@ -2089,7 +2967,7 @@ function downloadCalendar() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  alert('✅ Calendar downloaded as CSV! You can open this in Excel, Google Sheets, or any spreadsheet application.');
+  showToast('✅ CSV downloaded — open in Excel, Google Sheets, or any spreadsheet app', 4000);
 }
 
 // Simple modal approach that works everywhere
@@ -2281,7 +3159,7 @@ function showFullContent(asset) {
 
   contentHtml += `
     <div class="preview-actions">
-      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('.content-modal-body').innerText); alert('Content copied to clipboard!')">📋 Copy Content</button>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('.content-modal-body').innerText); showToast('📋 Content copied to clipboard')">📋 Copy Content</button>
       <button class="btn btn-secondary" onclick="document.querySelector('.content-modal-overlay').remove()">Close</button>
     </div>
   `;

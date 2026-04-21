@@ -1,8 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs-extra';
-import { spawn } from 'child_process';
+import Anthropic from '@anthropic-ai/sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -302,6 +303,14 @@ app.post('/api/campaigns/:product/journeys', async (req, res) => {
 
 // Generate new content dynamically
 app.post('/api/generate-content', async (req, res) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({
+      error: 'API key not configured',
+      setup: 'Set the ANTHROPIC_API_KEY environment variable. See README for instructions.'
+    });
+  }
+
   try {
     const { product, contentType, stage, audience, customPrompt } = req.body;
 
@@ -309,67 +318,88 @@ app.post('/api/generate-content', async (req, res) => {
       return res.status(400).json({ error: 'Product and content type are required' });
     }
 
-    // Call Python script with arguments
-    const scriptPath = join(__dirname, 'generate-content-api.py');
-    const args = [
-      scriptPath,
-      product,
-      contentType,
-      stage || 'AWARENESS',
-      audience || 'Enterprise Leaders',
-      customPrompt || ''
-    ];
+    // Load framework for this product to give Claude context
+    const frameworks = await fs.readJson(FRAMEWORKS_PATH);
+    const framework = frameworks[product] || {};
+    const brief = framework.campaignBrief?.content || '';
+    const pillars = (framework.pillars || []).map(p => `- ${p.name}: ${p.description}`).join('\n');
 
-    const python = spawn('python3', args);
+    const systemPrompt = `You are an expert B2B marketing copywriter. Generate marketing content as a JSON object.
+Return ONLY valid JSON — no markdown fences, no explanation.
 
-    let dataString = '';
-    let errorString = '';
+Product: ${framework.name || product}
+Portfolio message: ${framework.portfolioMessage || ''}
+Tagline: ${framework.tagline || ''}
+Pillars:
+${pillars}
+${brief ? `\nCampaign brief excerpt:\n${brief.slice(0, 800)}` : ''}`;
 
-    python.stdout.on('data', (data) => {
-      dataString += data.toString();
+    const userPrompt = buildContentPrompt(contentType, stage, audience, customPrompt);
+
+    const client = new Anthropic({ apiKey });
+    const message = await client.messages.create({
+      model: 'claude-opus-4-7',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: userPrompt }],
+      system: systemPrompt
     });
 
-    python.stderr.on('data', (data) => {
-      errorString += data.toString();
-    });
+    const rawText = message.content[0].text.trim();
+    // Strip markdown fences if the model adds them anyway
+    const jsonText = rawText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    const generatedContent = JSON.parse(jsonText);
 
-    python.on('close', async (code) => {
-      if (code !== 0) {
-        console.error('Python error:', errorString);
-        return res.status(500).json({ error: 'Content generation failed', details: errorString });
-      }
+    // Persist the new asset directly to campaigns.json
+    const assetName = customPrompt || generatedContent.title || generatedContent.subject || `${contentType} — ${stage}`;
+    const newAsset = {
+      id: `asset-${Date.now()}`,
+      name: assetName,
+      type: contentType.toUpperCase(),
+      stage: (stage || 'AWARENESS').toLowerCase(),
+      personas: audience ? [audience] : [],
+      status: 'draft',
+      content: generatedContent,
+      createdAt: new Date().toISOString()
+    };
 
-      try {
-        const generatedContent = JSON.parse(dataString);
+    const campaigns = await fs.readJson(CAMPAIGNS_PATH);
+    if (!campaigns[product]) {
+      campaigns[product] = { product, assets: [], journeys: [] };
+    }
+    campaigns[product].assets = campaigns[product].assets || [];
+    campaigns[product].assets.push(newAsset);
+    campaigns[product].lastUpdated = new Date().toISOString();
+    await fs.writeJson(CAMPAIGNS_PATH, campaigns, { spaces: 2 });
 
-        if (generatedContent.error) {
-          return res.status(400).json(generatedContent);
-        }
-
-        // Create new asset with generated content
-        const newAsset = {
-          id: `asset-${Date.now()}`,
-          name: customPrompt || generatedContent.title || generatedContent.subject || `${contentType} for ${product}`,
-          type: contentType.toUpperCase(),
-          stage: stage || 'AWARENESS',
-          audience: audience || 'Enterprise Leaders',
-          status: 'DRAFT',
-          content: generatedContent,
-          createdAt: new Date().toISOString()
-        };
-
-        res.json({ success: true, asset: newAsset });
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Data:', dataString);
-        res.status(500).json({ error: 'Failed to parse generated content', details: dataString });
-      }
-    });
-
+    res.json({ success: true, asset: newAsset });
   } catch (error) {
     console.error('Content generation error:', error);
+    if (error instanceof SyntaxError) {
+      return res.status(500).json({ error: 'Model returned invalid JSON. Try again.' });
+    }
     res.status(500).json({ error: error.message });
   }
 });
+
+function buildContentPrompt(contentType, stage, audience, customPrompt) {
+  const context = customPrompt ? `Additional context / title hint: "${customPrompt}"` : '';
+  const base = `Create a ${contentType} for the ${stage} stage targeting ${audience}.
+${context}
+Return a JSON object with relevant fields for this content type. Use these field names:
+- Email: { subject, preview_text, body_html (short excerpt), cta_text }
+- Blog Post: { title, meta_description, intro, body (3-4 paragraphs), cta }
+- LinkedIn Ad: { headline, body, cta_text, image_description }
+- Whitepaper: { title, executive_summary, key_sections (array of {title, summary}) }
+- Case Study: { title, customer_name, challenge, solution, results (array of strings), quote }
+- Webinar: { title, description, agenda (array of strings), speaker_bio }
+- Landing Page: { headline, subheadline, value_props (array), cta_text, social_proof }
+- Social Post: { platform, copy, hashtags (array), image_description }
+- ROI Calculator: { title, description, inputs (array of {label, default_value}), output_metric }
+- Demo Script: { title, opening, discovery_questions (array), key_demos (array), close }
+- Newsletter: { subject, preview_text, sections (array of {title, body}) }
+For any other type: { title, content, cta }`;
+  return base;
+}
 
 // Submit feedback
 app.post('/api/feedback', async (req, res) => {
