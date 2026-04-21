@@ -50,9 +50,14 @@ View your portfolio message, tagline, and 4 strategic pillars with the campaign 
 ![Framework View](docs/images/02-framework-view.png)
 
 ### Framework Editor
-Edit messaging, tagline, pillars, target personas, and marketing channels — all in one modal.
+Edit messaging, tagline, and pillars in one place.
 
-![Framework Editor](docs/images/03-edit-personas-and-channels.png)
+![Framework Editor](docs/images/03-framework-editor.png)
+
+### Personas & Channels
+Define target personas and marketing channels per product — no JSON editing required.
+
+![Personas and Channels](docs/images/03-edit-personas-and-channels.png)
 
 ### Asset Repository
 Search, filter, and manage marketing assets with colored tags, inline status toggle, and one-click duplicate.
@@ -62,7 +67,9 @@ Search, filter, and manage marketing assets with colored tags, inline status tog
 ### Edit Asset
 Full asset editing with dynamic channel and persona checkboxes, URL field, funnel stage, and quarter assignment.
 
-![Edit Asset](docs/images/05-edit-asset.png)
+![Edit Asset](docs/images/05-edit-asset-1.png)
+
+![Edit Asset continued](docs/images/05-edit-asset-2.png)
 
 ### Campaign Flow
 Visualize how assets map through your buyer journey from awareness to decision.
