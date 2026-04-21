@@ -4,7 +4,7 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-An open-source marketing campaign framework builder for creating structured campaign strategies, managing asset repositories, and visualizing buyer journeys.
+An open-source marketing campaign framework builder for creating structured campaign strategies, managing asset repositories, visualizing buyer journeys, and planning campaigns by quarter.
 
 [Features](#-features) • [Screenshots](#-screenshots) • [Quick Start](#-quick-start) • [Customization](CUSTOMIZATION.md) • [Contributing](CONTRIBUTING.md) • [FAQ](docs/FAQ.md)
 
@@ -12,19 +12,24 @@ An open-source marketing campaign framework builder for creating structured camp
 
 Campaign Builder helps marketing teams:
 
-1. **Define Campaign Frameworks** - Set portfolio messaging, taglines, and 4 key pillars
+1. **Define Campaign Frameworks** - Set portfolio messaging, taglines, 4 key pillars, and a campaign brief
 2. **Manage Asset Repository** - Organize marketing assets by funnel stage (Awareness, Familiarity, Consideration, Decision)
 3. **Build Campaign Flows** - Create and customize buyer journey stages
 4. **Visual Journey Mapping** - Map how prospects move through your funnel
-5. **Collect Feedback** - Built-in feedback system for team collaboration
+5. **Quarterly Campaign Planning** - Week-by-week grid view across all 4 funnel stages with quarter navigation
+6. **Collect Feedback** - Built-in feedback system for team collaboration
 
 ## ✨ Features
 
-- **Framework Editor**: Edit your messaging framework, tagline, and campaign pillars
+- **Campaign Brief**: Document campaign name, objectives, key messages, and KPIs — synced as context across all views
+- **Framework Editor**: Edit your messaging framework, tagline, and campaign pillars; changes cascade automatically to all tabs
 - **Campaign Flow Editor**: Customize your buyer journey stages and touchpoints
 - **Asset Repository**: Organize assets by funnel stage with status tracking (Live, In Progress, Being Refreshed)
 - **Multi-dimensional Tagging**: Tag assets by channel, persona, region, language, and more
 - **Visual Flow View**: See how assets connect through your campaign
+- **Quarter Planning View**: Visual week-by-week grid (13 weeks × 4 stages) with prev/next quarter navigation
+- **Calendar Views**: Month, quarter, and year calendar with export to slides or CSV
+- **Cascade Updates**: Updating the campaign brief or portfolio messaging automatically re-renders Asset Repository, Campaign Flow, Content Generator, and Journey Map
 - **Feedback System**: Built-in feedback collection and management
 - **Data Persistence**: All data saved locally in JSON files
 - **Responsive Design**: Works on desktop, tablet, and mobile

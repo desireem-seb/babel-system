@@ -3,6 +3,8 @@ let currentProduct = null;
 let currentFramework = null;
 let currentCampaign = null;
 let editingAsset = null;
+let lastFrameworkUpdate = null;
+let calendarQuarterOffset = 0;
 
 // DOM Elements
 const productSelector = document.getElementById('productSelector');
@@ -305,11 +307,12 @@ async function loadProduct(productId) {
     emptyState.style.display = 'none';
     campaignContent.style.display = 'block';
 
-    // Render framework
+    // Render all tabs
     renderFramework();
     renderAssetRepository();
     renderCampaignFlow();
     renderContentGenerator();
+    renderContentGeneratorBriefContext();
 
     // Load assets into journey map
     if (journeyMap) {
@@ -356,6 +359,38 @@ function renderFramework() {
     option.textContent = pillar.name;
     pillarSelect.appendChild(option);
   });
+
+  renderCampaignBrief();
+}
+
+function renderCampaignBrief() {
+  const briefSection = document.getElementById('campaignBriefSection');
+  const briefDisplay = document.getElementById('campaignBriefDisplay');
+  if (!briefSection || !briefDisplay) return;
+
+  const brief = currentFramework.campaignBrief || {};
+  briefSection.style.display = 'block';
+
+  const hasContent = brief.campaignName || brief.objective || brief.keyMessages || brief.targetOutcomes;
+
+  if (!hasContent) {
+    briefDisplay.innerHTML = `
+      <div class="brief-empty">
+        <p>No campaign brief added yet. Click <strong>✏️ Edit Framework</strong> to define your campaign strategy — it will flow through to all tabs.</p>
+      </div>
+    `;
+    return;
+  }
+
+  briefDisplay.innerHTML = `
+    <div class="brief-fields">
+      ${brief.campaignName ? `<div class="brief-field"><span class="brief-label">Campaign</span><span class="brief-value">${brief.campaignName}</span></div>` : ''}
+      ${brief.campaignPeriod ? `<div class="brief-field"><span class="brief-label">Period</span><span class="brief-value">${brief.campaignPeriod}</span></div>` : ''}
+      ${brief.targetOutcomes ? `<div class="brief-field"><span class="brief-label">KPIs</span><span class="brief-value">${brief.targetOutcomes}</span></div>` : ''}
+      ${brief.objective ? `<div class="brief-field brief-field-full"><span class="brief-label">Objective</span><div class="brief-value">${brief.objective}</div></div>` : ''}
+      ${brief.keyMessages ? `<div class="brief-field brief-field-full"><span class="brief-label">Key Messages</span><div class="brief-value brief-messages">${brief.keyMessages.replace(/\n/g, '<br>')}</div></div>` : ''}
+    </div>
+  `;
 }
 
 function renderAssetRepository() {
@@ -444,9 +479,12 @@ function switchTab(tabName) {
     content.classList.toggle('active', content.id === `${tabName}Tab`);
   });
 
-  // Render calendar when calendar tab is activated
+  // Tab-specific render hooks
   if (tabName === 'calendar') {
     renderCalendar();
+  }
+  if (tabName === 'generator' && currentFramework) {
+    renderContentGeneratorBriefContext();
   }
 }
 
@@ -655,6 +693,14 @@ function openEditFrameworkModal() {
     document.getElementById(`editPillar${pillarNum}Description`).value = pillar.description || '';
   }
 
+  // Populate campaign brief fields
+  const brief = currentFramework.campaignBrief || {};
+  document.getElementById('editCampaignName').value = brief.campaignName || '';
+  document.getElementById('editCampaignPeriod').value = brief.campaignPeriod || '';
+  document.getElementById('editCampaignObjective').value = brief.objective || '';
+  document.getElementById('editKeyMessages').value = brief.keyMessages || '';
+  document.getElementById('editTargetOutcomes').value = brief.targetOutcomes || '';
+
   // Show modal
   document.getElementById('editFrameworkModal').style.display = 'flex';
 }
@@ -693,13 +739,23 @@ async function saveFrameworkEdits() {
   btnSpinner.style.display = 'inline';
 
   try {
+    // Get campaign brief values
+    const campaignBrief = {
+      campaignName: document.getElementById('editCampaignName').value,
+      campaignPeriod: document.getElementById('editCampaignPeriod').value,
+      objective: document.getElementById('editCampaignObjective').value,
+      keyMessages: document.getElementById('editKeyMessages').value,
+      targetOutcomes: document.getElementById('editTargetOutcomes').value
+    };
+
     const response = await fetch(`/api/frameworks/${currentProduct}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         portfolioMessage,
         tagline,
-        pillars
+        pillars,
+        campaignBrief
       })
     });
 
@@ -709,14 +765,14 @@ async function saveFrameworkEdits() {
       // Update local framework
       currentFramework = result.framework;
 
-      // Re-render framework
-      renderFramework();
-
       // Close modal
       document.getElementById('editFrameworkModal').style.display = 'none';
       document.getElementById('editFrameworkForm').reset();
 
-      alert('✅ Framework updated successfully!');
+      // Cascade updates to all tabs
+      propagateFrameworkUpdate();
+
+      alert('✅ Framework & brief updated successfully!');
     } else {
       throw new Error(result.error || 'Framework update failed');
     }
@@ -728,6 +784,71 @@ async function saveFrameworkEdits() {
     btnText.style.display = 'inline';
     btnSpinner.style.display = 'none';
   }
+}
+
+function propagateFrameworkUpdate() {
+  lastFrameworkUpdate = new Date();
+
+  // Re-render the framework tab (brief + pillars)
+  renderFramework();
+
+  // Re-render asset repository (pillar names on cards refresh)
+  renderAssetRepository();
+
+  // Re-render campaign flow (uses currentFramework for stage labels)
+  renderCampaignFlow();
+
+  // Update campaign context panel in content generator
+  renderContentGenerator();
+  renderContentGeneratorBriefContext();
+
+  // Reload assets in journey map
+  if (typeof journeyMap !== 'undefined' && journeyMap) {
+    journeyMap.loadAssets(currentCampaign.assets || []);
+  }
+
+  // Show dismissible update banner on all non-framework tabs
+  const tabIds = ['repositoryTab', 'flowTab', 'generatorTab', 'journeyTab', 'calendarTab'];
+  tabIds.forEach(tabId => {
+    const tab = document.getElementById(tabId);
+    if (!tab) return;
+    const existing = tab.querySelector('.framework-update-banner');
+    if (existing) existing.remove();
+    const banner = document.createElement('div');
+    banner.className = 'framework-update-banner';
+    banner.innerHTML = `
+      <span>🔄 Campaign brief & messaging updated — all views now reflect the latest strategy</span>
+      <button class="banner-dismiss" onclick="this.closest('.framework-update-banner').remove()">✕</button>
+    `;
+    tab.insertAdjacentElement('afterbegin', banner);
+  });
+}
+
+function renderContentGeneratorBriefContext() {
+  const panel = document.getElementById('generatorBriefContext');
+  if (!panel || !currentFramework) return;
+
+  const brief = currentFramework.campaignBrief || {};
+  const hasContext = brief.campaignName || brief.objective || brief.keyMessages;
+
+  if (!hasContext) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="generator-context-header">
+      <h4>📄 Campaign Context</h4>
+      <span class="context-from-brief">From Campaign Brief</span>
+    </div>
+    <div class="generator-context-body">
+      ${brief.campaignName ? `<div class="context-row"><strong>Campaign:</strong> ${brief.campaignName}${brief.campaignPeriod ? ` &nbsp;·&nbsp; ${brief.campaignPeriod}` : ''}</div>` : ''}
+      ${brief.objective ? `<div class="context-row"><strong>Objective:</strong> ${brief.objective}</div>` : ''}
+      ${brief.keyMessages ? `<div class="context-row"><strong>Key Messages:</strong><div class="context-messages">${brief.keyMessages.replace(/\n/g, '<br>')}</div></div>` : ''}
+      ${brief.targetOutcomes ? `<div class="context-row"><strong>KPIs:</strong> ${brief.targetOutcomes}</div>` : ''}
+    </div>
+  `;
 }
 
 function openEditFlowModal() {
@@ -1357,7 +1478,7 @@ function renderCampaignFlow() {
 }
 
 function renderCalendar() {
-  const calendarContainer = document.querySelector('#calendarTab .calendar-container');
+  const calendarContainer = document.getElementById('calendarContainer');
   if (!calendarContainer) return;
 
   if (!currentCampaign || !currentCampaign.assets || currentCampaign.assets.length === 0) {
@@ -1484,68 +1605,122 @@ function renderMonthCalendar(container, assets) {
 
 function renderQuarterCalendar(container, assets) {
   const now = new Date();
-  const currentQuarter = Math.floor(now.getMonth() / 3);
-  const currentYear = now.getFullYear();
-  const quarterMonths = [
-    [0, 1, 2],    // Q1
-    [3, 4, 5],    // Q2
-    [6, 7, 8],    // Q3
-    [9, 10, 11]   // Q4
-  ][currentQuarter];
+  let baseQuarter = Math.floor(now.getMonth() / 3);
+  let year = now.getFullYear();
 
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Apply navigation offset
+  let totalQuarters = baseQuarter + calendarQuarterOffset;
+  while (totalQuarters < 0) { totalQuarters += 4; year--; }
+  while (totalQuarters > 3) { totalQuarters -= 4; year++; }
+  const quarter = totalQuarters;
 
-  let html = `
-    <div class="calendar-quarter-view">
-      <div class="calendar-quarter-header">
-        <h3>Q${currentQuarter + 1} ${currentYear}</h3>
-      </div>
-      <div class="calendar-quarter-grid">
-  `;
+  const quarterStartMonth = quarter * 3;
+  const quarterStart = new Date(year, quarterStartMonth, 1);
+  const quarterEnd = new Date(year, quarterStartMonth + 3, 0);
 
-  quarterMonths.forEach(month => {
-    const monthAssets = assets.filter(asset => {
-      const assetDate = asset.launchDate || asset.createdAt;
-      if (!assetDate) return false;
-      const date = new Date(assetDate);
-      return date.getMonth() === month && date.getFullYear() === currentYear;
-    });
+  // Build 13 weeks spanning the quarter
+  const weeks = [];
+  const weekCursor = new Date(quarterStart);
+  for (let w = 0; w < 13; w++) {
+    const wEnd = new Date(weekCursor);
+    wEnd.setDate(wEnd.getDate() + 6);
+    weeks.push({ start: new Date(weekCursor), end: new Date(wEnd) });
+    weekCursor.setDate(weekCursor.getDate() + 7);
+  }
 
-    html += `
-      <div class="calendar-month-card">
-        <h4>${monthNames[month]}</h4>
-        <div class="calendar-month-assets">
-          ${monthAssets.length === 0 ? '<p class="no-assets">No assets scheduled</p>' : ''}
-          ${monthAssets.map(asset => `
-            <div class="calendar-asset-item" data-asset-id="${asset.id}">
-              <span class="asset-icon">${getAssetIcon(asset.type)}</span>
-              <div class="asset-details">
-                <div class="asset-name">${asset.name}</div>
-                <div class="asset-date">${formatDate(asset.launchDate || asset.createdAt)}</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
+  const stages = ['awareness', 'familiarity', 'consideration', 'decision'];
+  const stageLabels = { awareness: 'Awareness', familiarity: 'Familiarity', consideration: 'Consideration', decision: 'Decision' };
+
+  // Place assets into grid[stage][weekIndex]
+  const grid = {};
+  stages.forEach(s => { grid[s] = weeks.map(() => []); });
+
+  assets.forEach(asset => {
+    const dateStr = asset.launchDate || asset.createdAt;
+    if (!dateStr) return;
+    const d = new Date(dateStr);
+    if (d < quarterStart || d > quarterEnd) return;
+    const wi = weeks.findIndex(w => d >= w.start && d <= w.end);
+    if (wi === -1) return;
+    const s = (asset.stage || '').toLowerCase();
+    if (grid[s]) grid[s][wi].push(asset);
   });
 
-  html += `
+  // Month divider labels for week headers
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const qNames = ['Q1', 'Q2', 'Q3', 'Q4'];
+  const qMonths = `${monthNames[quarterStartMonth]}–${monthNames[quarterStartMonth + 2]}`;
+
+  // Count assets in this quarter
+  const quarterAssets = assets.filter(a => {
+    const d = new Date(a.launchDate || a.createdAt || '');
+    return d >= quarterStart && d <= quarterEnd;
+  });
+
+  // Build HTML
+  const stageRows = stages.map(stage => {
+    const cells = weeks.map((w, wi) => {
+      const cellAssets = grid[stage][wi];
+      const chips = cellAssets.map(a => `
+        <div class="qw-asset-chip ${stage}" data-asset-id="${a.id}" title="${a.name}">
+          ${getAssetIcon(a.type)} <span>${a.name.length > 16 ? a.name.substring(0, 16) + '…' : a.name}</span>
+        </div>
+      `).join('');
+      return `<div class="qw-cell">${chips}</div>`;
+    }).join('');
+    return `<div class="qw-row">
+      <div class="qw-stage-label ${stage}">${stageLabels[stage]}</div>
+      ${cells}
+    </div>`;
+  }).join('');
+
+  const weekHeaders = weeks.map((w, i) => {
+    const isMonthBoundary = i === 0 || w.start.getMonth() !== weeks[i - 1].start.getMonth();
+    const label = isMonthBoundary ? monthNames[w.start.getMonth()] : `${i + 1}`;
+    return `<div class="qw-week-header ${isMonthBoundary ? 'month-boundary' : ''}" title="${w.start.toLocaleDateString()} – ${w.end.toLocaleDateString()}">${label}</div>`;
+  }).join('');
+
+  const stageSummary = stages.map(stage => {
+    const count = quarterAssets.filter(a => (a.stage || '').toLowerCase() === stage).length;
+    return `<div class="qw-summary-stat"><span class="qw-stat-dot ${stage}"></span>${stageLabels[stage]}: <strong>${count}</strong></div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="quarter-weekly-view">
+      <div class="qw-nav">
+        <button class="btn btn-secondary qw-prev">← Prev Quarter</button>
+        <h3>${qNames[quarter]} ${year} <span class="qw-subtitle">(${qMonths})</span></h3>
+        <button class="btn btn-secondary qw-next">Next Quarter →</button>
+      </div>
+      <div class="qw-grid-wrapper">
+        <div class="qw-grid">
+          <div class="qw-corner"></div>
+          ${weekHeaders}
+          ${stageRows}
+        </div>
+      </div>
+      <div class="qw-summary">
+        <span class="qw-total"><strong>${quarterAssets.length}</strong> assets this quarter</span>
+        <div class="qw-summary-stages">${stageSummary}</div>
       </div>
     </div>
   `;
 
-  container.innerHTML = html;
+  // Navigation handlers
+  container.querySelector('.qw-prev').addEventListener('click', () => {
+    calendarQuarterOffset--;
+    renderCalendar();
+  });
+  container.querySelector('.qw-next').addEventListener('click', () => {
+    calendarQuarterOffset++;
+    renderCalendar();
+  });
 
-  // Add click handlers
-  container.querySelectorAll('.calendar-asset-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const assetId = el.dataset.assetId;
-      const asset = assets.find(a => a.id === assetId);
-      if (asset) {
-        showFullContent(asset);
-      }
+  // Asset chip click handlers
+  container.querySelectorAll('.qw-asset-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const asset = assets.find(a => a.id === chip.dataset.assetId);
+      if (asset) showFullContent(asset);
     });
   });
 }

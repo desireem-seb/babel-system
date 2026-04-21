@@ -88,6 +88,14 @@
               <p id="taglineText" class="tagline-text"></p>
             </div>
 
+            <!-- Campaign Brief Section -->
+            <div id="campaignBriefSection" class="campaign-brief-box" style="display: none;">
+              <div class="brief-header">
+                <h3 class="brief-title">📄 Campaign Brief</h3>
+              </div>
+              <div id="campaignBriefDisplay" class="brief-display"></div>
+            </div>
+
             <div class="pillars-grid" id="pillarsGrid"></div>
           </div>
         </div>
@@ -214,6 +222,9 @@
               <h2>Content Generator & Preview</h2>
               <p class="subtitle">Generate new content or view existing campaign assets</p>
             </div>
+
+            <!-- Campaign Context Panel (populated from brief) -->
+            <div id="generatorBriefContext" class="generator-context-panel" style="display: none;"></div>
 
             <!-- Content Generation Form -->
             <div class="content-generator-form">
@@ -400,7 +411,7 @@
               </div>
             </div>
 
-            <div id="calendarView" class="calendar-container">
+            <div id="calendarContainer" class="calendar-container">
               <!-- Calendar will be dynamically rendered here -->
             </div>
           </div>
@@ -611,6 +622,39 @@
       </div>
       <div class="modal-body">
         <form id="editFrameworkForm">
+
+          <!-- Campaign Brief Section -->
+          <div style="background: #f0f7ff; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--accent);">
+            <h3 style="margin: 0 0 0.5rem 0; color: var(--accent);">📄 Campaign Brief</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;">High-level strategy that informs all assets and content across this campaign.</p>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Campaign Name</label>
+                <input type="text" id="editCampaignName" placeholder="e.g., Q2 2026 Cloud Integration Campaign">
+              </div>
+              <div class="form-group">
+                <label>Campaign Period</label>
+                <input type="text" id="editCampaignPeriod" placeholder="e.g., Apr – Jun 2026">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Campaign Objective</label>
+              <textarea id="editCampaignObjective" rows="2" placeholder="What are the primary goals of this campaign?"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Key Messages</label>
+              <small style="color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Core messages that all assets should reinforce (one per line)</small>
+              <textarea id="editKeyMessages" rows="4" placeholder="e.g., We eliminate integration complexity&#10;Real-time sync across every system&#10;Enterprise-grade security built in"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Target Outcomes / KPIs</label>
+              <input type="text" id="editTargetOutcomes" placeholder="e.g., 500 MQLs, 2× pipeline growth, 30% awareness lift">
+            </div>
+          </div>
 
           <!-- Header Section -->
           <div style="background: var(--sf-blue-light); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 2px solid var(--primary);">

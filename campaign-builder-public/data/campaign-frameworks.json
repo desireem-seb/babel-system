@@ -3,6 +3,7 @@
     "name": "CloudFlow Platform",
     "portfolioMessage": "The Complete Cloud Integration Platform for Modern Enterprises",
     "tagline": "Connect every app, automate every workflow, scale without limits",
+    "campaignBrief": {},
     "pillars": [
       {
         "id": "pillar-1",
@@ -74,6 +75,7 @@
     "name": "DataIQ Analytics",
     "portfolioMessage": "Turn Your Data Into Intelligent Decisions",
     "tagline": "Real-time analytics powered by AI, designed for everyone",
+    "campaignBrief": {},
     "pillars": [
       {
         "id": "pillar-1",
@@ -129,6 +131,7 @@
     "name": "SecurePass Identity",
     "portfolioMessage": "Zero Trust Security Starts With Identity",
     "tagline": "Passwordless authentication that users love and IT trusts",
+    "campaignBrief": {},
     "pillars": [
       {
         "id": "pillar-1",

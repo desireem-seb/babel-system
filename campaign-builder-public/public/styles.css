@@ -3357,3 +3357,327 @@ svg.connections {
 .empty-calendar-state p {
   font-size: 1rem;
 }
+
+/* ============================================================
+   Campaign Brief Styles
+   ============================================================ */
+
+.campaign-brief-box {
+  background: #f8f4ff;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.brief-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.brief-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+}
+
+.brief-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.brief-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.brief-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.brief-field-full {
+  grid-column: 1 / -1;
+}
+
+.brief-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.brief-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.brief-messages {
+  white-space: pre-line;
+}
+
+/* ============================================================
+   Framework Update Banner
+   ============================================================ */
+
+.framework-update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f0f7ff, #e8f3ff);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--primary-darker);
+  gap: 1rem;
+}
+
+.banner-dismiss {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0 0.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.banner-dismiss:hover {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   Content Generator Context Panel
+   ============================================================ */
+
+.generator-context-panel {
+  background: linear-gradient(135deg, #f8f4ff, #f0eeff);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.generator-context-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.generator-context-header h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+}
+
+.context-from-brief {
+  font-size: 0.75rem;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.generator-context-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.context-row {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.context-messages {
+  margin-top: 0.2rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--accent);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   Quarter Weekly Planning Grid
+   ============================================================ */
+
+.quarter-weekly-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.qw-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.qw-nav h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.qw-subtitle {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+.qw-grid-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+.qw-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(13, minmax(90px, 1fr));
+  min-width: 900px;
+}
+
+/* Corner cell */
+.qw-corner {
+  background: var(--bg-tertiary);
+  border-right: 2px solid var(--border-strong);
+  border-bottom: 2px solid var(--border-strong);
+}
+
+/* Week header cells */
+.qw-week-header {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-strong);
+  border-right: 1px solid var(--border-light);
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.qw-week-header.month-boundary {
+  background: var(--sf-blue-light);
+  color: var(--primary);
+  border-left: 2px solid var(--primary);
+  font-weight: 700;
+}
+
+/* Stage rows */
+.qw-row {
+  display: contents;
+}
+
+.qw-stage-label {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-right: 2px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.qw-stage-label.awareness  { background: #fff8e1; color: #856404; border-color: #ffc107; }
+.qw-stage-label.familiarity { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
+.qw-stage-label.consideration { background: #e3f2fd; color: #1565c0; border-color: #2196f3; }
+.qw-stage-label.decision   { background: #fce4ec; color: #880e4f; border-color: #e91e63; }
+
+/* Grid cells */
+.qw-cell {
+  padding: 0.4rem;
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Asset chips inside cells */
+.qw-asset-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qw-asset-chip:hover { opacity: 0.8; }
+
+.qw-asset-chip.awareness     { background: #fff8e1; color: #856404; border: 1px solid #ffc107; }
+.qw-asset-chip.familiarity   { background: #e8f5e9; color: #2e7d32; border: 1px solid #4caf50; }
+.qw-asset-chip.consideration { background: #e3f2fd; color: #1565c0; border: 1px solid #2196f3; }
+.qw-asset-chip.decision      { background: #fce4ec; color: #880e4f; border: 1px solid #e91e63; }
+
+.qw-asset-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Quarter summary bar */
+.qw-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.5rem;
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.qw-total {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.qw-summary-stages {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.qw-summary-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.qw-stat-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.qw-stat-dot.awareness     { background: #ffc107; }
+.qw-stat-dot.familiarity   { background: #4caf50; }
+.qw-stat-dot.consideration { background: #2196f3; }
+.qw-stat-dot.decision      { background: #e91e63; }
