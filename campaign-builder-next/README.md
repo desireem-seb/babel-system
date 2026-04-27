@@ -1,23 +1,44 @@
 # Campaign Builder
 
-An open-source, AI-powered campaign planning workspace for product marketing teams. Built with Next.js 16, TypeScript, Tailwind CSS v4, and Claude.
+An open-source campaign planning workspace for product marketing teams. Built with Next.js 16, TypeScript, Tailwind CSS v4, and Claude.
 
-> Ships with two fictional demo products — NovaTech Platform and NovaTech Analytics — so you can explore all features immediately.
+> Ships with two fictional demo products — **NovaTech Platform** and **NovaTech Analytics** — so you can explore every feature immediately with no setup.
+
+![Framework view](public/screenshots/framework.png)
 
 ---
 
-## What it does
+## Features
 
-Campaign Builder gives PMM teams a single workspace to manage campaign strategy from framework to execution:
+### Framework
+Document your product positioning in one place — messaging pillars, capabilities, personas, tagline, and a full campaign brief with quarterly themes.
 
-| Section | What you can do |
-|---|---|
-| **Framework** | Document positioning, messaging pillars, personas, tagline, campaign brief |
-| **Assets** | Track all campaign assets with stage, status, channels, personas, launch dates |
-| **Generator** | AI-write content from your framework, or upload your own files |
-| **Campaign Flow** | Visualize assets across the buyer journey with edit and reorder support |
-| **Journey Map** | Swimlane view by persona — spot coverage gaps at a glance |
-| **Calendar** | 13-week quarter grid showing scheduled launches by funnel stage |
+![Framework](public/screenshots/framework.png)
+
+### Asset Repository
+Track every campaign asset with stage (awareness → decision), status, channels, personas, regions, and launch dates. Bulk-update status, export to CSV, and get AI suggestions for coverage gaps.
+
+![Assets](public/screenshots/assets.png)
+
+### Content Generator
+Generate full campaign content grounded in your framework's positioning, or upload your own files to add assets manually.
+
+![Generator](public/screenshots/generator.png)
+
+### Campaign Flow
+Visualize assets across the buyer journey in a four-column funnel view. Edit mode lets you reorder assets up/down within each stage and edit any asset in place.
+
+![Flow](public/screenshots/flow.png)
+
+### Journey Map
+Swimlane view organized by persona — spot coverage gaps at a glance. Edit mode with pencil overlays on every asset chip. Mobile-friendly with horizontal scroll.
+
+![Journey](public/screenshots/journey.png)
+
+### Calendar
+13-week quarter grid showing scheduled launches by funnel stage. Export to CSV or printable HTML slides. Copy an entire quarter forward as drafts. Mobile shows a clean launch list.
+
+![Calendar](public/screenshots/calendar.png)
 
 ---
 
@@ -30,51 +51,57 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No database or API key required to get started.
+Open [http://localhost:3000](http://localhost:3000). No database or API key required — demo data loads automatically.
 
 ---
 
 ## AI content generation
 
-The Generator uses Claude to write full campaign assets grounded in your framework's positioning and personas.
+The Generator uses Claude to write full campaign assets grounded in your framework's positioning and personas. Add your API key to enable it:
 
 ```bash
 # .env.local
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+Without a key, all other features (assets, flow, journey, calendar) work fully.
+
 ---
 
 ## Data storage
 
-**Local (default):** JSON files in `/data/` — no setup, changes persist to disk.
+**Local dev (default):** Changes write to JSON files in `/data/`. No setup needed.
 
-**Production:** Set `DATABASE_URL` to a PostgreSQL connection string. The app auto-migrates on startup.
+**Production:** Set `DATABASE_URL` to a PostgreSQL connection string. The app auto-migrates tables on startup.
 
 ```bash
+# Heroku example
 heroku config:set DATABASE_URL=postgres://...
 heroku config:set ANTHROPIC_API_KEY=sk-ant-...
+git push heroku main
 ```
 
 ---
 
-## Customizing for your company
+## Customizing for your team
 
 1. **Replace demo data** — edit `data/campaign-frameworks.json` and `data/campaigns/<product>.json`
-2. **Update branding** — logomark and app name are in `src/components/layout/Sidebar.tsx` and `AppShell.tsx`
-3. **Add products** — add a new key to `campaign-frameworks.json`, create a matching `data/campaigns/<id>.json`
+2. **Add a product** — add a new entry in `campaign-frameworks.json`, create `data/campaigns/<id>.json`
+3. **Update branding** — logo and app name live in `src/components/layout/Sidebar.tsx` and `AppShell.tsx`
 
 ---
 
 ## Tech stack
 
-- **Framework:** Next.js 16 App Router, `output: standalone`
-- **Language:** TypeScript strict
-- **Styling:** Tailwind CSS v4, class-based dark mode
-- **State:** Zustand + TanStack Query
-- **AI:** Anthropic Claude (`@anthropic-ai/sdk`)
-- **Database:** PostgreSQL via `pg` (optional, falls back to JSON)
-- **Deploy:** Heroku-ready (`Procfile` + `app.json`)
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 App Router, `output: standalone` |
+| Language | TypeScript (strict) |
+| Styling | Tailwind CSS v4, class-based dark mode |
+| State | Zustand + TanStack Query |
+| AI | Anthropic Claude (`@anthropic-ai/sdk`) |
+| Database | PostgreSQL via `pg` (optional, falls back to JSON) |
+| Deploy | Heroku-ready (`Procfile` + `app.json`) |
 
 ---
 

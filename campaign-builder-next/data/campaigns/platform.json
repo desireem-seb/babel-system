@@ -86,7 +86,7 @@
     {
       "id": "asset-platform-006",
       "type": "SOLUTION_BRIEF",
-      "name": "NovaTech vs. Salesforce + Clari + Highspot: A Buyer's Comparison",
+      "name": "NovaTech vs. Patchwork Stacks: A Buyer's Comparison Guide",
       "stage": "consideration",
       "status": "live",
       "pillar": "integrations",
@@ -94,7 +94,7 @@
       "personas": ["Chief Revenue Officer", "Revenue Operations"],
       "regions": ["north-america"],
       "languages": ["english"],
-      "description": "One-pager comparing NovaTech all-in-one approach vs. common stack of CRM + forecasting + enablement tools. Includes TCO analysis.",
+      "description": "One-pager comparing NovaTech's all-in-one platform vs. a typical 3-tool stack of CRM + forecasting + enablement. Includes TCO analysis and switching cost breakdown.",
       "launchDate": "2026-03-01T00:00:00Z",
       "createdAt": "2026-02-20T00:00:00Z",
       "updatedAt": "2026-02-20T00:00:00Z"
@@ -150,7 +150,7 @@
     {
       "id": "asset-platform-010",
       "type": "SOCIAL_POST",
-      "name": "LinkedIn Campaign — CRO Audience (Q2 Series)",
+      "name": "Social Campaign — CRO Audience (Q2 Series)",
       "stage": "awareness",
       "status": "draft",
       "pillar": "revenue-intelligence",
@@ -158,7 +158,7 @@
       "personas": ["Chief Revenue Officer"],
       "regions": ["north-america", "emea"],
       "languages": ["english"],
-      "description": "8-post LinkedIn series targeting CROs with insights on forecasting accuracy, deal visibility, and the cost of delayed pipeline data.",
+      "description": "8-post social series targeting CROs with insights on forecasting accuracy, deal visibility, and the cost of delayed pipeline data.",
       "launchDate": "2026-05-01T00:00:00Z",
       "createdAt": "2026-04-15T00:00:00Z",
       "updatedAt": "2026-04-15T00:00:00Z"

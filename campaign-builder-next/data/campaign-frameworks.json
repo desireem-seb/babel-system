@@ -40,7 +40,7 @@
       {
         "id": "integrations",
         "name": "Open Integration Ecosystem",
-        "description": "200+ native integrations with tools your team already uses — Slack, LinkedIn, HubSpot, Gong, Outreach, and more. Open API for custom workflows. No rip-and-replace required.",
+        "description": "200+ native integrations with tools your team already uses — video conferencing, conversation intelligence, sales engagement, and more. Open API for custom workflows. No rip-and-replace required.",
         "capabilities": [
           "200+ Native Connectors",
           "Bidirectional Sync",
@@ -102,7 +102,7 @@
       {
         "id": "data-connectors",
         "name": "Connect Any Data Source in Minutes",
-        "description": "Native connectors to Salesforce, HubSpot, Marketo, Stripe, Mixpanel, and 80+ more. Automated data refresh. Schema detection. No engineers needed to get your first dashboard live.",
+        "description": "Native connectors to NovaTech CRM, Segment, Amplitude, Stripe, and 80+ more. Automated data refresh. Schema detection. No engineers needed to get your first dashboard live.",
         "capabilities": [
           "80+ Native Connectors",
           "Auto Schema Detection",
