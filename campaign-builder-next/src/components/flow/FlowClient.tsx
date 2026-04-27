@@ -189,21 +189,21 @@ export function FlowClient({ frameworks, initialCampaign }: FlowClientProps) {
               value={filterPersona}
               onChange={(e) => setFilterPersona(e.target.value)}
               options={[{ value: '', label: 'All personas' }, ...personaOptions]}
-              className="w-44"
+              className="w-full sm:w-44"
             />
             <Select
               placeholder="All channels"
               value={filterChannel}
               onChange={(e) => setFilterChannel(e.target.value)}
               options={[{ value: '', label: 'All channels' }, ...ALL_CHANNELS]}
-              className="w-44"
+              className="w-full sm:w-44"
             />
             <Select
               placeholder="All regions"
               value={filterRegion}
               onChange={(e) => setFilterRegion(e.target.value)}
               options={[{ value: '', label: 'All regions' }, ...ALL_REGIONS]}
-              className="w-40"
+              className="w-full sm:w-40"
             />
             {activeFilterCount > 0 && (
               <Button
@@ -334,22 +334,22 @@ function FlowColumn({
                       <button
                         onClick={() => onMoveAsset?.(asset.id, 'up')}
                         disabled={i === 0}
-                        className="w-5 h-5 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="w-7 h-7 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
-                        <ChevronUp size={11} />
+                        <ChevronUp size={12} />
                       </button>
                       <button
                         onClick={() => onMoveAsset?.(asset.id, 'down')}
                         disabled={i === assets.length - 1}
-                        className="w-5 h-5 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="w-7 h-7 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
-                        <ChevronDown size={11} />
+                        <ChevronDown size={12} />
                       </button>
                       <button
                         onClick={() => onEditAsset?.(asset)}
-                        className="w-5 h-5 flex items-center justify-center rounded text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950"
+                        className="w-7 h-7 flex items-center justify-center rounded text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950"
                       >
-                        <Pencil size={10} />
+                        <Pencil size={12} />
                       </button>
                     </div>
                   )}

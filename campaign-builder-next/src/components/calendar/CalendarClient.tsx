@@ -345,8 +345,8 @@ ${weekSlides}
         }
       />
 
-      {/* Desktop grid */}
-      <div className="px-4 md:px-6 overflow-x-auto">
+      {/* Desktop grid — horizontal scroll on tablet, hidden on mobile */}
+      <div className="hidden sm:block px-4 md:px-6 overflow-x-auto">
         <div className="min-w-[700px]">
           {/* Week headers */}
           <div className="grid gap-px mb-1" style={{ gridTemplateColumns: `100px repeat(13, 1fr)` }}>
@@ -412,10 +412,10 @@ ${weekSlides}
         </div>
       </div>
 
-      {/* Mobile: list view */}
-      <div className="md:hidden px-4 mt-4 space-y-2">
-        <p className="text-xs text-zinc-400 font-medium">
-          Rotate to landscape or use desktop for the full grid view.
+      {/* Mobile: list view (sm and below) */}
+      <div className="sm:hidden px-4 mt-4 space-y-2">
+        <p className="text-xs text-zinc-400 font-medium pb-1">
+          Upcoming launches this quarter
         </p>
         {assets.length === 0 ? (
           <EmptyState

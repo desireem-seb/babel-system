@@ -177,21 +177,21 @@ export function JourneyClient({ frameworks, initialCampaign }: JourneyClientProp
               value={filterPersona}
               onChange={(e) => setFilterPersona(e.target.value)}
               options={[{ value: '', label: 'All personas' }, ...personaOptions]}
-              className="w-44"
+              className="w-full sm:w-44"
             />
             <Select
               placeholder="All channels"
               value={filterChannel}
               onChange={(e) => setFilterChannel(e.target.value)}
               options={[{ value: '', label: 'All channels' }, ...ALL_CHANNELS]}
-              className="w-44"
+              className="w-full sm:w-44"
             />
             <Select
               placeholder="All regions"
               value={filterRegion}
               onChange={(e) => setFilterRegion(e.target.value)}
               options={[{ value: '', label: 'All regions' }, ...ALL_REGIONS]}
-              className="w-40"
+              className="w-full sm:w-40"
             />
             {activeFilterCount > 0 && (
               <Button
@@ -216,7 +216,10 @@ export function JourneyClient({ frameworks, initialCampaign }: JourneyClientProp
           />
         </div>
       ) : (
-        <div className="px-4 md:px-6 overflow-x-auto">
+        <div className="px-4 md:px-6 overflow-x-auto -mx-0">
+          <p className="sm:hidden text-xs text-zinc-400 mb-2 flex items-center gap-1">
+            <span>←</span> Scroll to see all stages <span>→</span>
+          </p>
           <div className="min-w-[700px]">
 
             {/* Stage header row */}
@@ -309,7 +312,7 @@ export function JourneyClient({ frameworks, initialCampaign }: JourneyClientProp
                               {editMode && (
                                 <button
                                   onClick={() => setEditAsset(a)}
-                                  className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-400 hover:text-indigo-600 hover:border-indigo-300 shadow-sm transition-colors"
+                                  className="absolute top-1 right-1 w-7 h-7 flex items-center justify-center rounded bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-400 hover:text-indigo-600 hover:border-indigo-300 shadow-sm transition-colors"
                                   title="Edit asset"
                                 >
                                   <Pencil size={9} />
@@ -360,7 +363,7 @@ export function JourneyClient({ frameworks, initialCampaign }: JourneyClientProp
                         {editMode && (
                           <button
                             onClick={() => setEditAsset(a)}
-                            className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-400 hover:text-indigo-600 hover:border-indigo-300 shadow-sm transition-colors"
+                            className="absolute top-1 right-1 w-7 h-7 flex items-center justify-center rounded bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-400 hover:text-indigo-600 hover:border-indigo-300 shadow-sm transition-colors"
                             title="Edit asset"
                           >
                             <Pencil size={9} />

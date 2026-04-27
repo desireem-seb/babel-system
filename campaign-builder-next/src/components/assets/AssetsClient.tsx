@@ -386,21 +386,21 @@ export function AssetsClient({ frameworks, initialCampaign, initialProduct }: As
                 { value: 'all', label: 'All stages' },
                 ...ASSET_STAGES.map((s) => ({ value: s, label: STAGE_LABELS[s] })),
               ]}
-              className="w-36"
+              className="w-full sm:w-36"
             />
             <Select
               placeholder="All statuses"
               value={assetFilters.status}
               onChange={(e) => setAssetFilter('status', e.target.value as typeof assetFilters.status)}
               options={[{ value: 'all', label: 'All statuses' }, ...STATUS_OPTIONS]}
-              className="w-36"
+              className="w-full sm:w-36"
             />
             <Select
               placeholder="All types"
               value={assetFilters.type}
               onChange={(e) => setAssetFilter('type', e.target.value as typeof assetFilters.type)}
               options={[{ value: 'all', label: 'All types' }, ...TYPE_OPTIONS]}
-              className="w-40"
+              className="w-full sm:w-40"
             />
             {activeFilterCount > 0 && (
               <Button
