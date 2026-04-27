@@ -21,9 +21,11 @@ Track every campaign asset with stage (awareness → decision), status, channels
 ![Assets](public/screenshots/assets.png)
 
 ### Content Generator
-Generate full campaign content grounded in your framework's positioning, or upload your own files to add assets manually.
+Generate full campaign content grounded in your framework's positioning. Or upload your own files to add assets manually — no AI key required.
 
 ![Generator](public/screenshots/generator.png)
+
+![Upload assets](public/screenshots/generator-upload-assets.png)
 
 ### Campaign Flow
 Visualize assets across the buyer journey in a four-column funnel view. Edit mode lets you reorder assets up/down within each stage and edit any asset in place.
@@ -33,12 +35,22 @@ Visualize assets across the buyer journey in a four-column funnel view. Edit mod
 ### Journey Map
 Swimlane view organized by persona — spot coverage gaps at a glance. Edit mode with pencil overlays on every asset chip. Mobile-friendly with horizontal scroll.
 
-![Journey](public/screenshots/journey.png)
+![Journey Map](public/screenshots/journey-map.png)
 
 ### Calendar
 13-week quarter grid showing scheduled launches by funnel stage. Export to CSV or printable HTML slides. Copy an entire quarter forward as drafts. Mobile shows a clean launch list.
 
 ![Calendar](public/screenshots/calendar.png)
+
+### Feedback
+Collect and track campaign feedback alongside your assets — keep stakeholder input in context, not buried in email.
+
+![Feedback](public/screenshots/feedback.png)
+
+### Dark Mode
+Full dark mode support across every view — toggle in the top-right corner.
+
+![Dark mode](public/screenshots/darkmode.png)
 
 ---
 
@@ -64,7 +76,7 @@ The Generator uses Claude to write full campaign assets grounded in your framewo
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Without a key, all other features (assets, flow, journey, calendar) work fully.
+Without a key, all other features (assets, flow, journey, calendar, feedback) work fully.
 
 ---
 
