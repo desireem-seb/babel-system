@@ -1,0 +1,29 @@
+{
+  "name": "campaign-builder",
+  "description": "AI-powered marketing campaign planning workspace for PMM teams",
+  "stack": "heroku-24",
+  "buildpacks": [
+    { "url": "heroku/nodejs" }
+  ],
+  "addons": [
+    { "plan": "heroku-postgresql:essential-0" }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "ANTHROPIC_API_KEY": {
+      "description": "Anthropic API key for AI content generation (optional — generator tab requires this)"
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string — auto-set by heroku-postgresql add-on"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+}

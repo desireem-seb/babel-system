@@ -1,0 +1,137 @@
+{
+  "platform": {
+    "name": "NovaTech Platform",
+    "portfolio": "NovaTech Platform is the unified workspace for modern revenue teams — combining CRM, analytics, and AI-powered automation in a single product. It helps B2B companies reduce tool sprawl, accelerate pipeline, and give every rep the context they need to close deals faster.",
+    "tagline": "One platform. Every revenue motion. Zero context-switching.",
+    "pillars": [
+      {
+        "id": "unified-workspace",
+        "name": "Unified Revenue Workspace",
+        "description": "Replace a patchwork of point tools with a single workspace where sales, marketing, and CS share the same data, the same pipeline view, and the same AI — no more syncing, no more silos.",
+        "capabilities": [
+          "360° Account View",
+          "Cross-Team Pipeline Visibility",
+          "Shared Activity Timeline",
+          "Single Source of Truth"
+        ]
+      },
+      {
+        "id": "ai-copilot",
+        "name": "AI Copilot for Every Rep",
+        "description": "Embedded AI surfaces next-best-action recommendations, auto-drafts emails, summarizes call recordings, and predicts deal risk — so reps spend time selling, not searching.",
+        "capabilities": [
+          "Next-Best-Action Engine",
+          "Email & Proposal Drafting",
+          "Call Summary & Coaching",
+          "Deal Risk Scoring"
+        ]
+      },
+      {
+        "id": "revenue-intelligence",
+        "name": "Revenue Intelligence & Forecasting",
+        "description": "Move from gut-feel forecasting to AI-driven pipeline analysis. Identify coverage gaps, spot at-risk deals, and give leadership the confidence to call the number — weeks earlier than before.",
+        "capabilities": [
+          "AI-Driven Forecast Rollups",
+          "Pipeline Health Scoring",
+          "Coverage Gap Analysis",
+          "Historical Win/Loss Patterns"
+        ]
+      },
+      {
+        "id": "integrations",
+        "name": "Open Integration Ecosystem",
+        "description": "200+ native integrations with tools your team already uses — Slack, LinkedIn, HubSpot, Gong, Outreach, and more. Open API for custom workflows. No rip-and-replace required.",
+        "capabilities": [
+          "200+ Native Connectors",
+          "Bidirectional Sync",
+          "Open REST API",
+          "Workflow Automation Builder"
+        ]
+      }
+    ],
+    "personas": [
+      "VP of Sales",
+      "Revenue Operations",
+      "Chief Revenue Officer",
+      "Sales Manager",
+      "Account Executive"
+    ],
+    "campaignBrief": {
+      "content": "Q3 campaign focus: Drive platform consolidation narrative — target mid-market companies (200–2000 employees) spending on 3+ point solutions. Message: NovaTech replaces the CRM + forecasting + enablement stack at a lower TCO with better outcomes. Key proof points: 2.4x faster ramp, 18% higher win rate, 34% reduction in tools spend.",
+      "quarterlyThemes": {
+        "Q1-2026": "Platform Launch & Awareness",
+        "Q2-2026": "Pipeline Acceleration — Mid-Market",
+        "Q3-2026": "Enterprise Expansion",
+        "Q4-2026": "Year-End Consolidation Push"
+      }
+    },
+    "flowStages": {
+      "awareness": { "label": "Awareness", "subtitle": "Tool consolidation problem" },
+      "familiarity": { "label": "Familiarity", "subtitle": "NovaTech Platform overview" },
+      "consideration": { "label": "Consideration", "subtitle": "ROI & comparison content" },
+      "decision": { "label": "Decision", "subtitle": "Trial, demo, procurement" }
+    }
+  },
+  "analytics": {
+    "name": "NovaTech Analytics",
+    "portfolio": "NovaTech Analytics turns raw pipeline and customer data into decisions. Built for revenue and ops teams, it delivers real-time dashboards, cohort analysis, and predictive models — without needing a data team to set it up.",
+    "tagline": "Revenue clarity for every team, from first touch to renewal.",
+    "pillars": [
+      {
+        "id": "self-serve-bi",
+        "name": "Self-Serve BI for Revenue Teams",
+        "description": "Drag-and-drop dashboards built on your CRM, product, and marketing data. No SQL required. Ops teams set up once; execs and managers explore on their own.",
+        "capabilities": [
+          "Drag-and-Drop Dashboard Builder",
+          "Pre-Built Revenue Templates",
+          "Scheduled Report Delivery",
+          "Role-Based Data Views"
+        ]
+      },
+      {
+        "id": "predictive-analytics",
+        "name": "Predictive Pipeline & Churn Models",
+        "description": "ML models trained on your historical data predict which deals will close, which accounts are at churn risk, and where expansion opportunities are hiding — before your reps ask.",
+        "capabilities": [
+          "Deal Close Probability",
+          "Churn Risk Scoring",
+          "Expansion Signal Detection",
+          "Anomaly Alerting"
+        ]
+      },
+      {
+        "id": "data-connectors",
+        "name": "Connect Any Data Source in Minutes",
+        "description": "Native connectors to Salesforce, HubSpot, Marketo, Stripe, Mixpanel, and 80+ more. Automated data refresh. Schema detection. No engineers needed to get your first dashboard live.",
+        "capabilities": [
+          "80+ Native Connectors",
+          "Auto Schema Detection",
+          "Incremental Data Refresh",
+          "Custom SQL Layer (Advanced)"
+        ]
+      }
+    ],
+    "personas": [
+      "Revenue Operations",
+      "VP of Marketing",
+      "CFO",
+      "Sales Manager",
+      "Customer Success Lead"
+    ],
+    "campaignBrief": {
+      "content": "Q3 campaign: Target RevOps and Finance buyers at companies 100–500 employees who are stuck in spreadsheet forecasting. Key message: get to accurate revenue predictions in under a week — no data team, no custom engineering. Proof point: customers go from 0 to live dashboard in 4 days on average.",
+      "quarterlyThemes": {
+        "Q1-2026": "RevOps Transformation",
+        "Q2-2026": "Forecasting Accuracy Focus",
+        "Q3-2026": "Self-Serve BI for SMB",
+        "Q4-2026": "Enterprise Data Partnerships"
+      }
+    },
+    "flowStages": {
+      "awareness": { "label": "Awareness", "subtitle": "Forecasting & data pain" },
+      "familiarity": { "label": "Familiarity", "subtitle": "Analytics overview" },
+      "consideration": { "label": "Consideration", "subtitle": "ROI & integrations" },
+      "decision": { "label": "Decision", "subtitle": "Trial & onboarding" }
+    }
+  }
+}
